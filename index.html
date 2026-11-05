@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en" dir="ltr" id="html-root">
 <head>
 <meta charset="UTF-8">
@@ -39,7 +40,6 @@ header{background:var(--primary-color);color:#fff;width:100%;padding:15px 20px;d
 .place-card img{width:100%;height:150px;object-fit:cover;display:block;background:#e2e8f0}
 .place-card div{padding:12px 15px;font-weight:bold;color:var(--primary-color)}
 .status{text-align:center;padding:30px 10px;color:#64748b;grid-column:1/-1}
-.status.err{color:var(--danger-color)}
 /* زرار الواتساب العايم */
 .wa-fab{position:fixed;z-index:900;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));width:calc(100% - 32px);max-width:568px;background:#25d366;color:#fff;border:none;border-radius:50px;padding:15px 20px;font-size:15px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 16px rgba(37,211,102,.45);font-family:inherit}
 .wa-fab:hover{background:#20ba5a}
@@ -111,7 +111,6 @@ header{background:var(--primary-color);color:#fff;width:100%;padding:15px 20px;d
   </div>
 </div>
 
-<!-- زرار الواتساب العايم: ظاهر في كل الصفحات -->
 <button class="wa-fab" onclick="openWhatsAppModal(waMsg)">💬 <span id="fab-text"></span></button>
 
 <div id="waModal" class="modal" onclick="if(event.target===this)closeWhatsAppModal()">
@@ -123,22 +122,11 @@ header{background:var(--primary-color);color:#fff;width:100%;padding:15px 20px;d
 </div>
 
 <script>
-/* ================= الإعدادات ================= */
-
-// 1) مفتاح Google API (Drive API) — شوف الشرح في الرد
-const DRIVE_API_KEY = "AIzaSyAesAjJ72fxFo_hyMrEcd5JY7uaDkSaokE";
-
-// 2) فولدر الدرايف الرئيسي (Gem_Excursions)
-const ROOT_FOLDER_ID = "1hsH7kMxTZbX7N5MrC9bAxFL--5Nvvlk4";
-// 3) أرقام الواتساب: بالكود الدولي من غير + ولا 00
+/* ================= الإعدادات وأرقام الفريق ================= */
 const teamContacts = [
   { name: "باسل سعيد", number: "201062519011" },
   { name: "أمجد حلمي", number: "201284234111" }
 ];
-
-/* تسمية الفولدرات في الدرايف (اختياري):
-   "Cairo | القاهرة"  => الإنجليزي قبل | والعربي بعدها. أي لغة غير العربي تاخد الإنجليزي.
-   وممكن تبدأ الاسم برقم للترتيب: "1- Cairo | القاهرة" (الرقم بيتشال من العرض). */
 
 const translations = {
   ar: {
@@ -147,17 +135,15 @@ const translations = {
     fab: "للتواصل لمزيد من المعلومات والحجز", modalTitle: "اختر الشخص المناسب لمراسلته عبر الواتساب", closeBtn: "إغلاق",
     backMain: "القائمة الرئيسية", backDest: "العودة للوجهات", backPlaces: "رجوع للأماكن", chooseGov: "اختر الوجهة السياحية",
     carTitle: "🚗 تأجير سيارات مع سائق محترف", carDesc: "استمتع براحة الحرية والاستكشاف على طريقتك الخاصة! نوفر لك سيارات حديثة ومكيفة بالكامل مع نخبة من السائقين المحترفين.",
-    airportTitle: "✈️ انتقالات المطار بكل سهولة وأمان", airportDesc: "ابدأ رحلتك بلا إرهاق! نحن في انتظارك لحظة هبوط طائرتك لضمان وصولك بكل أمان وراحة.",
-    loading: "جاري التحميل...", loadError: "تعذر تحميل البيانات. تأكد من مفتاح الـ API ومن مشاركة الفولدر للجميع.", empty: "لا توجد عناصر لعرضها حالياً."
+    airportTitle: "✈️ انتقالات المطار بكل سهولة وأمان", airportDesc: "ابدأ رحلتك بلا إرهاق! نحن في انتظارك لحظة هبوط طائرتك لضمان وصولك بكل أمان وراحة."
   },
   en: {
     subtitle: "Travel Agencies - Explore Egypt", mainTitle: "Welcome to Gem Travel - Select Service",
     sightseeing: "🏛️ Sightseeing & Excursions", carRental: "🚗 Car Rental with Driver", airportTransfer: "✈️ Airport Transfers",
     fab: "Contact for More Information & Booking", modalTitle: "Select Team Member to Contact via WhatsApp", closeBtn: "Close",
-    backMain: "Main Menu", backDest: "Back to Destinations", backPlaces: "Back to Places", chooseGov: "Select Destination",
+    baseName: "Main Menu", backMain: "Main Menu", backDest: "Back to Destinations", backPlaces: "Back to Places", chooseGov: "Select Destination",
     carTitle: "🚗 Car Rental with Professional Driver", carDesc: "Enjoy freedom and exploration at your own pace! We offer modern, fully air-conditioned cars with professional drivers for a stress-free journey.",
-    airportTitle: "✈️ Seamless Airport Transfers", airportDesc: "Start your trip without any fatigue! We will be waiting for you the moment your plane lands to ensure a smooth arrival.",
-    loading: "Loading...", loadError: "Could not load data. Check the API key and that the folder is shared with everyone.", empty: "Nothing to show yet."
+    airportTitle: "✈️ Seamless Airport Transfers", airportDesc: "Start your trip without any fatigue! We will be waiting for you the moment your plane lands to ensure a smooth arrival."
   },
   fr: {
     subtitle: "Agence de voyage - Découvrez l'Égypte", mainTitle: "Bienvenue chez Gem Travel - Choisissez un service",
@@ -165,8 +151,7 @@ const translations = {
     fab: "Contact pour plus d'informations & réservation", modalTitle: "Choisissez la personne à contacter sur WhatsApp", closeBtn: "Fermer",
     backMain: "Menu principal", backDest: "Retour aux destinations", backPlaces: "Retour aux lieux", chooseGov: "Choisissez la destination",
     carTitle: "🚗 Location de voiture avec chauffeur professionnel", carDesc: "Profitez de la liberté à votre rythme ! Voitures modernes et climatisées avec chauffeurs professionnels.",
-    airportTitle: "✈️ Transferts aéroport sans stress", airportDesc: "Commencez votre voyage sans fatigue ! Nous vous attendons dès l'atterrissage de votre avion.",
-    loading: "Chargement...", loadError: "Impossible de charger les données.", empty: "Rien à afficher pour le moment."
+    airportTitle: "✈️ Transferts aéroport sans stress", airportDesc: "Commencez votre voyage sans fatigue ! Nous vous attendons dès l'atterrissage de votre avion."
   },
   es: {
     subtitle: "Agencia de viajes - Explora Egipto", mainTitle: "Bienvenido a Gem Travel - Elige un servicio",
@@ -174,8 +159,7 @@ const translations = {
     fab: "Contacto para más información y reservas", modalTitle: "Elige con quién hablar por WhatsApp", closeBtn: "Cerrar",
     backMain: "Menú principal", backDest: "Volver a destinos", backPlaces: "Volver a lugares", chooseGov: "Elige el destino",
     carTitle: "🚗 Alquiler de coche con conductor profesional", carDesc: "¡Disfruta de la libertad a tu ritmo! Coches modernos con aire acondicionado y conductores profesionales.",
-    airportTitle: "✈️ Traslados al aeropuerto sin complicaciones", airportDesc: "¡Empieza tu viaje sin cansancio! Te esperamos en cuanto aterrice tu avión.",
-    loading: "Cargando...", loadError: "No se pudieron cargar los datos.", empty: "Nada que mostrar por ahora."
+    airportTitle: "✈️ Traslados al aeropuerto sin complicaciones", airportDesc: "¡Empieza tu viaje sin cansancio! Te esperamos en cuanto aterrice tu avión."
   },
   zh: {
     subtitle: "旅行社 - 探索埃及", mainTitle: "欢迎来到 Gem Travel - 请选择服务",
@@ -183,8 +167,7 @@ const translations = {
     fab: "联系我们了解更多信息与预订", modalTitle: "选择要通过 WhatsApp 联系的人员", closeBtn: "关闭",
     backMain: "主菜单", backDest: "返回目的地", backPlaces: "返回景点", chooseGov: "选择目的地",
     carTitle: "🚗 专业司机包车服务", carDesc: "按自己的节奏自由探索！我们提供现代化全空调车辆和专业司机。",
-    airportTitle: "✈️ 轻松机场接送", airportDesc: "让旅程从轻松开始！飞机降落时我们就在等您。",
-    loading: "加载中...", loadError: "无法加载数据。", empty: "暂无内容。"
+    airportTitle: "✈️ 轻松机场接送", airportDesc: "让旅程从轻松开始！飞机降落时我们就在等您。"
   },
   ja: {
     subtitle: "旅行代理店 - エジプトを探索", mainTitle: "Gem Travel へようこそ - サービスを選択",
@@ -192,123 +175,191 @@ const translations = {
     fab: "詳細・ご予約はこちらからご連絡ください", modalTitle: "WhatsAppで連絡する担当者を選択", closeBtn: "閉じる",
     backMain: "メインメニュー", backDest: "目的地へ戻る", backPlaces: "観光地へ戻る", chooseGov: "目的地を選択",
     carTitle: "🚗 プロの運転手付きレンタカー", carDesc: "自分のペースで自由に旅を！最新のエアコン完備車とプロの運転手をご用意します。",
-    airportTitle: "✈️ 安心の空港送迎", airportDesc: "疲れずに旅を始めましょう！到着時にお待ちしています。",
-    loading: "読み込み中...", loadError: "データを読み込めませんでした。", empty: "表示する項目がありません。"
+    airportTitle: "✈️ 安心の空港送迎", airportDesc: "疲れずに旅を始めましょう！到着時にお待ちしています。"
   }
 };
 
-/* ================= المنطق ================= */
+/* قاعدة بيانات الوجهات والأماكن والصور مباشرة داخل الكود لتجنب أخطاء الدرايف والمتحكمات */
+const tourData = [
+  {
+    id: "cairo",
+    name: { ar: "القاهرة", en: "Cairo", fr: "Le Caire", es: "El Cairo", zh: "开罗", ja: "カイロ" },
+    places: [
+      {
+        name: { ar: "أهرامات الجيزة وأبو الهول", en: "Pyramids of Giza & Sphinx", fr: "Pyramides de Gizeh", es: "Pirámides de Giza", zh: "吉萨金字塔", ja: "ギザのピラミッド" },
+        images: [
+          "https://images.unsplash.com/photo-1539650116574-8efeb43e2750",
+          "https://images.unsplash.com/photo-1503177119275-0aa32b3a93eb"
+        ]
+      },
+      {
+        name: { ar: "المتحف المصري الكبير", en: "Grand Egyptian Museum", fr: "Grand Musée Égyptien", es: "Gran Museo Egipcio", zh: "大埃及博物馆", ja: "大エジプト博物館" },
+        images: [
+          "https://images.unsplash.com/photo-1564507592333-c60657eea523",
+          "https://images.unsplash.com/photo-1568322445760-727c66798c8c"
+        ]
+      },
+      {
+        name: { ar: "قلعة صلاح الدين ومسجد محمد علي", en: "Cairo Citadel & Mohamed Ali Mosque", fr: "Citadelle du Caire", es: "Ciudadela de El Cairo", zh: "开罗城堡", ja: "カイロ城" },
+        images: [
+          "https://images.unsplash.com/photo-1572252009286-268acec5ca0a",
+          "https://images.unsplash.com/photo-1544816155-12df9643f363"
+        ]
+      }
+    ]
+  },
+  {
+    id: "alex",
+    name: { ar: "الإسكندرية", en: "Alexandria", fr: "Alexandrie", es: "Alejandría", zh: "亚历山大", ja: "アレクサンドリア" },
+    places: [
+      {
+        name: { ar: "قلعة قايتباي", en: "Qaitbay Citadel", fr: "Citadelle de Qaitbay", es: "Ciudadela de Qaitbay", zh: "盖特拜城堡", ja: "カイトベイ要塞" },
+        images: [
+          "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7",
+          "https://images.unsplash.com/photo-1541872703-74c5e44368f9"
+        ]
+      },
+      {
+        name: { ar: "مكتبة الإسكندرية", en: "Bibliotheca Alexandrina", fr: "Bibliothèque d'Alexandrie", es: "Biblioteca Alejandrina", zh: "亚历山大图书馆", ja: "アレクサンドリア図書館" },
+        images: [
+          "https://images.unsplash.com/photo-1541872703-74c5e44368f9",
+          "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7"
+        ]
+      }
+    ]
+  },
+  {
+    id: "aswan",
+    name: { ar: "أسوان", en: "Aswan", fr: "Assouan", es: "Asuán", zh: "阿斯旺", ja: "アスワン" },
+    places: [
+      {
+        name: { ar: "معابد أبو سمبل", en: "Abu Simbel Temples", fr: "Temples d'Abou Simbel", es: "Templos de Abu Simbel", zh: "阿布辛贝神庙", ja: "アブ・シンベル神殿" },
+        images: [
+          "https://images.unsplash.com/photo-1564507592333-c60657eea523",
+          "https://images.unsplash.com/photo-1539650116574-8efeb43e2750"
+        ]
+      },
+      {
+        name: { ar: "معبد فيلة والقرية النوبية", en: "Philae Temple & Nubian Village", fr: "Temple de Philae", es: "Templo de File", zh: "菲莱神庙", ja: "フィラエ神殿" },
+        images: [
+          "https://images.unsplash.com/photo-1544816155-12df9643f363",
+          "https://images.unsplash.com/photo-1564507592333-c60657eea523"
+        ]
+      }
+    ]
+  },
+  {
+    id: "luxor",
+    name: { ar: "الأقصر", en: "Luxor", fr: "Louxor", es: "Luxor", zh: "卢克索", ja: "ルクソール" },
+    places: [
+      {
+        name: { ar: "مجمع معابد الكرنك", en: "Karnak Temple Complex", fr: "Complexe templier de Karnak", es: "Templo de Karnak", zh: "卡纳克神庙", ja: "カルナック神殿" },
+        images: [
+          "https://images.unsplash.com/photo-1608953151270-2495edab4fb6",
+          "https://images.unsplash.com/photo-1568322445760-727c66798c8c"
+        ]
+      },
+      {
+        name: { ar: "وادي الملوك", en: "Valley of the Kings", fr: "Vallée des Rois", es: "Valle de los Reyes", zh: "帝王谷", ja: "王家の谷" },
+        images: [
+          "https://images.unsplash.com/photo-1568322445760-727c66798c8c",
+          "https://images.unsplash.com/photo-1608953151270-2495edab4fb6"
+        ]
+      }
+    ]
+  },
+  {
+    id: "sharm",
+    name: { ar: "شرم الشيخ", en: "Sharm El Sheikh", fr: "Charm el-Cheikh", es: "Sharm el-Sheij", zh: "沙姆沙伊赫", ja: "シャルム・エル・シェイク" },
+    places: [
+      {
+        name: { ar: "محمية رأس محمد", en: "Ras Mohamed National Park", fr: "Parc national Ras Mohamed", es: "Parque Nacional Ras Mohamed", zh: "穆罕默德国家公园", ja: "ラス・モハメッド国立公園" },
+        images: [
+          "https://images.unsplash.com/photo-1544551763-46a013bb70d5",
+          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
+        ]
+      }
+    ]
+  },
+  {
+    id: "hurghada",
+    name: { ar: "الغردقة", en: "Hurghada", fr: "Hourghada", es: "Hurgada", zh: "洪加达", ja: "フルガダ" },
+    places: [
+      {
+        name: { ar: "رحلة جزيرة جفتون والسنوركلنج", en: "Giftun Island Snorkeling", fr: "Île Giftun", es: "Isla Giftun", zh: "吉夫顿岛", ja: "ギフトン島" },
+        images: [
+          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+          "https://images.unsplash.com/photo-1544551763-46a013bb70d5"
+        ]
+      }
+    ]
+  }
+];
 
 let lang = "en", waMsg = "", slideIdx = 0, slideTimer = null;
-let destinations = [], currentDest = null, currentPlaces = null, detail = null;
+let currentDest = null, currentPlace = null;
 const $ = id => document.getElementById(id);
 const t = k => (translations[lang] && translations[lang][k]) || translations.en[k] || "";
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const thumb = id => `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
 const screens = ["main-hub-screen", "sightseeing-screen", "car-rental-screen", "airport-transfer-screen", "gov-screen", "detail-screen"];
 
-// اسم العرض من اسم الفولدر
-function dispName(name, l = lang) {
-  const clean = name.replace(/^\d{1,2}\s*[._-]\s*/, "");
-  const parts = clean.split("|").map(s => s.trim());
-  return parts.length > 1 ? (l === "ar" ? parts[1] : parts[0]) : parts[0];
+function getName(obj) {
+  return obj[lang] || obj['en'] || obj['ar'];
 }
 
-/* Drive API */
-const cache = {};
-async function listFolder(id) {
-  if (cache[id]) return cache[id];
-  const q = encodeURIComponent(`'${id}' in parents and trashed=false`);
-  const fields = encodeURIComponent("files(id,name,mimeType)");
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&orderBy=name&pageSize=200&key=${DRIVE_API_KEY}`);
-  if (!res.ok) throw new Error("Drive API " + res.status);
-  const files = (await res.json()).files || [];
-  return (cache[id] = {
-    folders: files.filter(f => f.mimeType === "application/vnd.google-apps.folder"),
-    images: files.filter(f => f.mimeType.startsWith("image/"))
-  });
-}
-
-/* التنقل */
 const defaultMsgs = {
   "main-hub-screen": "Hello Gem Travel, I would like more information and general booking.",
   "sightseeing-screen": "Hello Gem Travel, I want to inquire about sightseeing and excursions.",
   "car-rental-screen": "Hello Gem Travel, I want to inquire about Car Rental with Driver.",
   "airport-transfer-screen": "Hello Gem Travel, I want to book an Airport Transfer."
 };
+
 function openScreen(id) {
   stopSlides();
   screens.forEach(s => $(s).classList.toggle("hidden", s !== id));
   if (defaultMsgs[id]) waMsg = defaultMsgs[id];
   window.scrollTo(0, 0);
 }
+
 function goMainHub() { openScreen("main-hub-screen"); }
 
-/* الوجهات */
-async function openSightseeing() {
+function openSightseeing() {
   openScreen("sightseeing-screen");
   const grid = $("gov-grid");
-  grid.innerHTML = `<div class="status">${t("loading")}</div>`;
-  try {
-    destinations = (await listFolder(ROOT_FOLDER_ID)).folders;
-    renderDestinations();
-  } catch (e) {
-    console.error(e);
-    grid.innerHTML = `<div class="status err">${t("loadError")}</div>`;
-  }
-}
-function renderDestinations() {
-  $("gov-grid").innerHTML = destinations.length
-    ? destinations.map((d, i) => `<div class="btn-card" onclick="openDest(${i})">${esc(dispName(d.name))}</div>`).join("")
-    : `<div class="status">${t("empty")}</div>`;
+  grid.innerHTML = tourData.map((d, i) => `<div class="btn-card" onclick="openDest(${i})">${esc(getName(d.name))}</div>`).join("");
 }
 
-/* الأماكن داخل الوجهة */
-async function openDest(i) {
-  currentDest = destinations[i];
+function openDest(i) {
+  currentDest = tourData[i];
   openScreen("gov-screen");
-  $("gov-title").textContent = dispName(currentDest.name);
-  waMsg = `Hello Gem Travel, I want to inquire about excursions in ${dispName(currentDest.name, "en")}.`;
-  const box = $("gov-content");
-  box.innerHTML = `<div class="status">${t("loading")}</div>`;
-  try {
-    const { folders, images } = await listFolder(currentDest.id);
-    if (!folders.length) {            // مفيش فولدرات أماكن: اعرض صور الوجهة على طول
-      currentPlaces = null;
-      if (images.length) return showDetail({ name: currentDest.name, images }, true);
-      box.innerHTML = `<div class="status">${t("empty")}</div>`;
-      return;
-    }
-    currentPlaces = await Promise.all(folders.map(async f => ({ name: f.name, images: (await listFolder(f.id)).images })));
-    renderPlaces();
-  } catch (e) {
-    console.error(e);
-    box.innerHTML = `<div class="status err">${t("loadError")}</div>`;
-  }
+  $("gov-title").textContent = getName(currentDest.name);
+  waMsg = `Hello Gem Travel, I want to inquire about excursions in ${currentDest.name.en}.`;
+  
+  $("gov-content").innerHTML = currentDest.places.map((p, idx) =>
+    `<div class="place-card" onclick="showDetail(${i}, ${idx})">
+       ${p.images[0] ? `<img src="${p.images[0]}" alt="" loading="lazy">` : ""}
+       <div>${esc(getName(p.name))}</div></div>`).join("");
 }
-function renderPlaces() {
-  $("gov-content").innerHTML = currentPlaces.map((p, i) =>
-    `<div class="place-card" onclick="showDetail(currentPlaces[${i}])">
-       ${p.images[0] ? `<img src="${thumb(p.images[0].id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}
-       <div>${esc(dispName(p.name))}</div></div>`).join("");
-}
-function backFromDetail() { currentPlaces ? openScreenGov() : openSightseeing(); }
-function openScreenGov() { openScreen("gov-screen"); waMsg = `Hello Gem Travel, I want to inquire about excursions in ${dispName(currentDest.name, "en")}.`; }
 
-/* التفاصيل + السلايد شو */
-function showDetail(d) {
-  detail = d;
+function backFromDetail() { openDest(tourData.indexOf(currentDest)); }
+
+function showDetail(destIdx, placeIdx) {
+  currentDest = tourData[destIdx];
+  currentPlace = currentDest.places[placeIdx];
   openScreen("detail-screen");
-  $("place-title").textContent = dispName(d.name);
-  const imgs = d.images, multi = imgs.length > 1;
+  $("place-title").textContent = getName(currentPlace.name);
+  
+  const imgs = currentPlace.images, multi = imgs.length > 1;
   $("slider-container").innerHTML = imgs.length
-    ? imgs.map((im, n) => `<div class="mySlides${n === 0 ? " active" : ""}"><img src="${thumb(im.id)}" alt="${esc(dispName(d.name))}" onerror="this.style.opacity=.2"></div>`).join("") +
+    ? imgs.map((im, n) => `<div class="mySlides${n === 0 ? " active" : ""}"><img src="${im}" alt=""></div>`).join("") +
       (multi ? `<button class="slide-nav prev" onclick="moveSlide(-1)">❮</button><button class="slide-nav next" onclick="moveSlide(1)">❯</button><div class="slide-count" id="slide-count">1/${imgs.length}</div>` : "")
-    : `<div class="status" style="color:#fff">${t("empty")}</div>`;
-  waMsg = `Hello Gem Travel, I want to inquire/book: ${dispName(d.name, "en")}` + (currentDest ? ` (${dispName(currentDest.name, "en")})` : "");
+    : `<div class="status">لا توجد صور</div>`;
+    
+  waMsg = `Hello Gem Travel, I want to inquire/book: ${currentPlace.name.en} (${currentDest.name.en})`;
   slideIdx = 0;
   if (multi) slideTimer = setInterval(() => moveSlide(1, true), 4000);
 }
+
 function moveSlide(d, auto) {
   const s = document.querySelectorAll(".mySlides");
   if (!s.length) return;
@@ -319,9 +370,9 @@ function moveSlide(d, auto) {
   if (c) c.textContent = `${slideIdx + 1}/${s.length}`;
   if (!auto && slideTimer) { clearInterval(slideTimer); slideTimer = setInterval(() => moveSlide(1, true), 4000); }
 }
+
 function stopSlides() { if (slideTimer) { clearInterval(slideTimer); slideTimer = null; } }
 
-/* الواتساب */
 function openWhatsAppModal(text) {
   const box = $("wa-options-container");
   box.innerHTML = "";
@@ -338,26 +389,30 @@ function openWhatsAppModal(text) {
   });
   $("waModal").style.display = "flex";
 }
+
 function closeWhatsAppModal() { $("waModal").style.display = "none"; }
 
-/* اللغة */
 function changeLanguage(l) {
   lang = l;
   const root = $("html-root");
   root.lang = l;
   root.dir = l === "ar" ? "rtl" : "ltr";
   $("languageSelect").value = l;
+  
   const map = {
     "header-subtitle": "subtitle", "txt-main-title": "mainTitle", "btn-sightseeing": "sightseeing", "btn-car-rental": "carRental",
     "btn-airport-transfer": "airportTransfer", "fab-text": "fab", "modal-title": "modalTitle", "modal-close-btn": "closeBtn",
     "txt-choose-gov": "chooseGov", "car-title": "carTitle", "car-desc": "carDesc", "airport-title": "airportTitle", "airport-desc": "airportDesc"
   };
-  Object.entries(map).forEach(([id, key]) => $(id).textContent = t(key));
+  Object.entries(map).forEach(([id, key]) => { if($(id)) $(id).textContent = t(key); });
   document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
-  // إعادة رسم الشاشة المفتوحة (من الكاش، من غير طلبات جديدة)
-  if (!$("sightseeing-screen").classList.contains("hidden") && destinations.length) renderDestinations();
-  else if (!$("gov-screen").classList.contains("hidden") && currentDest) { $("gov-title").textContent = dispName(currentDest.name); if (currentPlaces) renderPlaces(); }
-  else if (!$("detail-screen").classList.contains("hidden") && detail) { $("place-title").textContent = dispName(detail.name); }
+  
+  if (!$("sightseeing-screen").classList.contains("hidden")) openSightseeing();
+  else if (!$("gov-screen").classList.contains("hidden") && currentDest) {
+    $("gov-title").textContent = getName(currentDest.name);
+  } else if (!$("detail-screen").classList.contains("hidden") && currentPlace) {
+    $("place-title").textContent = getName(currentPlace.name);
+  }
 }
 
 changeLanguage("en");
