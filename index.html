@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Gem Travel Agencies - Explore Egypt</title>
+<style>
+:root{--primary-color:#0f172a;--accent-color:#0284c7;--danger-color:#dc2626;--bg-color:#f8fafc;--card-bg:#fff;--text-color:#334155}
+*{box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg-color);color:var(--text-color);margin:0;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+header{background:var(--primary-color);color:#fff;width:100%;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 6px rgba(0,0,0,.1);border-bottom:3px solid var(--danger-color)}
+.logo-area h1{margin:0;font-size:18px;letter-spacing:1px;text-align:start}
+.logo-area p{margin:2px 0 0;font-size:11px;color:#cbd5e1;text-align:start}
+.lang-selector select{background:#1e293b;color:#fff;border:1px solid #475569;padding:6px 10px;border-radius:6px;font-size:13px;cursor:pointer;outline:none}
+.container{width:100%;max-width:600px;padding:20px 20px 110px;flex:1}
+.section-title{font-size:18px;font-weight:bold;margin-bottom:15px;color:var(--primary-color);border-bottom:2px solid #e2e8f0;padding-bottom:5px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:30px}
+.main-menu-grid{display:flex;flex-direction:column;gap:15px;margin-top:20px}
+.btn-card,.main-btn{background:var(--card-bg);border-radius:12px;text-align:center;font-weight:bold;cursor:pointer;transition:all .3s;box-shadow:0 2px 4px rgba(0,0,0,.05)}
+.btn-card{border:2px solid var(--accent-color);padding:20px 15px;font-size:15px;color:var(--accent-color)}
+.btn-card:hover{background:var(--accent-color);color:#fff;transform:translateY(-2px)}
+.main-btn{border:2px solid var(--danger-color);padding:22px;font-size:17px;color:var(--danger-color)}
+.main-btn:hover{background:var(--danger-color);color:#fff;transform:translateY(-2px)}
+.info-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 10px rgba(0,0,0,.05);margin-bottom:20px;border-inline-start:5px solid var(--danger-color)}
+.info-card h3{margin-top:0;color:var(--primary-color);font-size:19px}
+.info-card p{line-height:1.6;color:#475569;font-size:15px}
+.back-btn{background:#64748b;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;margin-bottom:20px;font-size:14px}
+.back-btn:hover{background:#475569}
+.back-btn::before{content:"← "}
+[dir=rtl] .back-btn::before{content:"→ "}
+.slideshow-container{position:relative;border-radius:12px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,.15);background:#000;direction:ltr}
+.mySlides{display:none;text-align:center}
+.mySlides.active{display:block}
+.mySlides img{width:100%;height:260px;object-fit:cover}
+.slide-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;font-size:22px;padding:8px 12px;cursor:pointer;z-index:2}
+.slide-nav.prev{left:0;border-radius:0 8px 8px 0}
+.slide-nav.next{right:0;border-radius:8px 0 0 8px}
+.slide-count{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:3px 8px;border-radius:10px;z-index:2}
+.place-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.08);margin-bottom:15px;cursor:pointer}
+.place-card img{width:100%;height:150px;object-fit:cover;display:block;background:#e2e8f0}
+.place-card div{padding:12px 15px;font-weight:bold;color:var(--primary-color)}
+.status{text-align:center;padding:30px 10px;color:#64748b;grid-column:1/-1}
+.status.err{color:var(--danger-color)}
+/* زرار الواتساب العايم */
+.wa-fab{position:fixed;z-index:900;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));width:calc(100% - 32px);max-width:568px;background:#25d366;color:#fff;border:none;border-radius:50px;padding:15px 20px;font-size:15px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 16px rgba(37,211,102,.45);font-family:inherit}
+.wa-fab:hover{background:#20ba5a}
+/* نافذة الاختيار */
+.modal{display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.5);justify-content:center;align-items:center}
+.modal-content{background:#fff;padding:20px;border-radius:12px;width:90%;max-width:400px;text-align:center;box-shadow:0 5px 15px rgba(0,0,0,.3)}
+.modal-content h3{margin-top:0;color:var(--primary-color)}
+.wa-number-option{background:#f1f5f9;border:2px solid #25d366;color:#1e293b;padding:12px;margin:10px 0;border-radius:8px;font-weight:bold;display:block;text-decoration:none;transition:.2s}
+.wa-number-option:hover{background:#25d366;color:#fff}
+.close-modal{background:#64748b;color:#fff;border:none;padding:8px 15px;border-radius:6px;margin-top:10px;cursor:pointer}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <h1>GEM TRAVEL</h1>
+    <p id="header-subtitle"></p>
+  </div>
+  <div class="lang-selector">
+    <select id="languageSelect" onchange="changeLanguage(this.value)">
+      <option value="ar">العربية</option>
+      <option value="en" selected>English</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+      <option value="zh">中文</option>
+      <option value="ja">日本語</option>
+    </select>
+  </div>
+</header>
+
+<div class="container">
+  <div id="main-hub-screen">
+    <div class="section-title" id="txt-main-title"></div>
+    <div class="main-menu-grid">
+      <div class="main-btn" onclick="openSightseeing()" id="btn-sightseeing"></div>
+      <div class="main-btn" onclick="openScreen('car-rental-screen')" id="btn-car-rental"></div>
+      <div class="main-btn" onclick="openScreen('airport-transfer-screen')" id="btn-airport-transfer"></div>
+    </div>
+  </div>
+
+  <div id="sightseeing-screen" class="hidden">
+    <button class="back-btn" data-t="backMain" onclick="goMainHub()"></button>
+    <div class="section-title" id="txt-choose-gov"></div>
+    <div class="grid" id="gov-grid"></div>
+  </div>
+
+  <div id="car-rental-screen" class="hidden">
+    <button class="back-btn" data-t="backMain" onclick="goMainHub()"></button>
+    <div class="info-card"><h3 id="car-title"></h3><p id="car-desc"></p></div>
+  </div>
+
+  <div id="airport-transfer-screen" class="hidden">
+    <button class="back-btn" data-t="backMain" onclick="goMainHub()"></button>
+    <div class="info-card"><h3 id="airport-title"></h3><p id="airport-desc"></p></div>
+  </div>
+
+  <div id="gov-screen" class="hidden">
+    <button class="back-btn" data-t="backDest" onclick="openSightseeing()"></button>
+    <div class="section-title" id="gov-title"></div>
+    <div id="gov-content"></div>
+  </div>
+
+  <div id="detail-screen" class="hidden">
+    <button class="back-btn" data-t="backPlaces" onclick="backFromDetail()"></button>
+    <div class="section-title" id="place-title"></div>
+    <div class="slideshow-container" id="slider-container"></div>
+  </div>
+</div>
+
+<!-- زرار الواتساب العايم: ظاهر في كل الصفحات -->
+<button class="wa-fab" onclick="openWhatsAppModal(waMsg)">💬 <span id="fab-text"></span></button>
+
+<div id="waModal" class="modal" onclick="if(event.target===this)closeWhatsAppModal()">
+  <div class="modal-content">
+    <h3 id="modal-title"></h3>
+    <div id="wa-options-container"></div>
+    <button class="close-modal" onclick="closeWhatsAppModal()" id="modal-close-btn"></button>
+  </div>
+</div>
+
+<script>
+/* ================= الإعدادات ================= */
+
+// 1) مفتاح Google API (Drive API) — شوف الشرح في الرد
+const DRIVE_API_KEY = "PUT_YOUR_API_KEY_HERE";
+
+// 2) فولدر الدرايف الرئيسي (Gem_Excursions)
+const ROOT_FOLDER_ID = "1hsH7kMxTZbX7N5MrC9bAxFL--5Nvvlk4";
+
+// 3) أرقام الواتساب: بالكود الدولي من غير + ولا 00
+const teamContacts = [
+  { name: "باسل سعيد", number: "201062519011" },
+  { name: "أمجد حلمي", number: "201284234111" }
+];
+
+/* تسمية الفولدرات في الدرايف (اختياري):
+   "Cairo | القاهرة"  => الإنجليزي قبل | والعربي بعدها. أي لغة غير العربي تاخد الإنجليزي.
+   وممكن تبدأ الاسم برقم للترتيب: "1- Cairo | القاهرة" (الرقم بيتشال من العرض). */
+
+const translations = {
+  ar: {
+    subtitle: "وكالة سفر - اكتشف مصر", mainTitle: "مرحباً بك في Gem Travel - اختر الخدمة",
+    sightseeing: "🏛️ الجولات السياحية والرحلات", carRental: "🚗 تأجير سيارات مع سائق", airportTransfer: "✈️ انتقالات المطار",
+    fab: "للتواصل لمزيد من المعلومات والحجز", modalTitle: "اختر الشخص المناسب لمراسلته عبر الواتساب", closeBtn: "إغلاق",
+    backMain: "القائمة الرئيسية", backDest: "العودة للوجهات", backPlaces: "رجوع للأماكن", chooseGov: "اختر الوجهة السياحية",
+    carTitle: "🚗 تأجير سيارات مع سائق محترف", carDesc: "استمتع براحة الحرية والاستكشاف على طريقتك الخاصة! نوفر لك سيارات حديثة ومكيفة بالكامل مع نخبة من السائقين المحترفين.",
+    airportTitle: "✈️ انتقالات المطار بكل سهولة وأمان", airportDesc: "ابدأ رحلتك بلا إرهاق! نحن في انتظارك لحظة هبوط طائرتك لضمان وصولك بكل أمان وراحة.",
+    loading: "جاري التحميل...", loadError: "تعذر تحميل البيانات. تأكد من مفتاح الـ API ومن مشاركة الفولدر للجميع.", empty: "لا توجد عناصر لعرضها حالياً."
+  },
+  en: {
+    subtitle: "Travel Agencies - Explore Egypt", mainTitle: "Welcome to Gem Travel - Select Service",
+    sightseeing: "🏛️ Sightseeing & Excursions", carRental: "🚗 Car Rental with Driver", airportTransfer: "✈️ Airport Transfers",
+    fab: "Contact for More Information & Booking", modalTitle: "Select Team Member to Contact via WhatsApp", closeBtn: "Close",
+    backMain: "Main Menu", backDest: "Back to Destinations", backPlaces: "Back to Places", chooseGov: "Select Destination",
+    carTitle: "🚗 Car Rental with Professional Driver", carDesc: "Enjoy freedom and exploration at your own pace! We offer modern, fully air-conditioned cars with professional drivers for a stress-free journey.",
+    airportTitle: "✈️ Seamless Airport Transfers", airportDesc: "Start your trip without any fatigue! We will be waiting for you the moment your plane lands to ensure a smooth arrival.",
+    loading: "Loading...", loadError: "Could not load data. Check the API key and that the folder is shared with everyone.", empty: "Nothing to show yet."
+  },
+  fr: {
+    subtitle: "Agence de voyage - Découvrez l'Égypte", mainTitle: "Bienvenue chez Gem Travel - Choisissez un service",
+    sightseeing: "🏛️ Visites & Excursions", carRental: "🚗 Location de voiture avec chauffeur", airportTransfer: "✈️ Transferts aéroport",
+    fab: "Contact pour plus d'informations & réservation", modalTitle: "Choisissez la personne à contacter sur WhatsApp", closeBtn: "Fermer",
+    backMain: "Menu principal", backDest: "Retour aux destinations", backPlaces: "Retour aux lieux", chooseGov: "Choisissez la destination",
+    carTitle: "🚗 Location de voiture avec chauffeur professionnel", carDesc: "Profitez de la liberté à votre rythme ! Voitures modernes et climatisées avec chauffeurs professionnels.",
+    airportTitle: "✈️ Transferts aéroport sans stress", airportDesc: "Commencez votre voyage sans fatigue ! Nous vous attendons dès l'atterrissage de votre avion.",
+    loading: "Chargement...", loadError: "Impossible de charger les données.", empty: "Rien à afficher pour le moment."
+  },
+  es: {
+    subtitle: "Agencia de viajes - Explora Egipto", mainTitle: "Bienvenido a Gem Travel - Elige un servicio",
+    sightseeing: "🏛️ Turismo y excursiones", carRental: "🚗 Alquiler de coche con conductor", airportTransfer: "✈️ Traslados al aeropuerto",
+    fab: "Contacto para más información y reservas", modalTitle: "Elige con quién hablar por WhatsApp", closeBtn: "Cerrar",
+    backMain: "Menú principal", backDest: "Volver a destinos", backPlaces: "Volver a lugares", chooseGov: "Elige el destino",
+    carTitle: "🚗 Alquiler de coche con conductor profesional", carDesc: "¡Disfruta de la libertad a tu ritmo! Coches modernos con aire acondicionado y conductores profesionales.",
+    airportTitle: "✈️ Traslados al aeropuerto sin complicaciones", airportDesc: "¡Empieza tu viaje sin cansancio! Te esperamos en cuanto aterrice tu avión.",
+    loading: "Cargando...", loadError: "No se pudieron cargar los datos.", empty: "Nada que mostrar por ahora."
+  },
+  zh: {
+    subtitle: "旅行社 - 探索埃及", mainTitle: "欢迎来到 Gem Travel - 请选择服务",
+    sightseeing: "🏛️ 观光与游览", carRental: "🚗 包车（含司机）", airportTransfer: "✈️ 机场接送",
+    fab: "联系我们了解更多信息与预订", modalTitle: "选择要通过 WhatsApp 联系的人员", closeBtn: "关闭",
+    backMain: "主菜单", backDest: "返回目的地", backPlaces: "返回景点", chooseGov: "选择目的地",
+    carTitle: "🚗 专业司机包车服务", carDesc: "按自己的节奏自由探索！我们提供现代化全空调车辆和专业司机。",
+    airportTitle: "✈️ 轻松机场接送", airportDesc: "让旅程从轻松开始！飞机降落时我们就在等您。",
+    loading: "加载中...", loadError: "无法加载数据。", empty: "暂无内容。"
+  },
+  ja: {
+    subtitle: "旅行代理店 - エジプトを探索", mainTitle: "Gem Travel へようこそ - サービスを選択",
+    sightseeing: "🏛️ 観光・ツアー", carRental: "🚗 運転手付きレンタカー", airportTransfer: "✈️ 空港送迎",
+    fab: "詳細・ご予約はこちらからご連絡ください", modalTitle: "WhatsAppで連絡する担当者を選択", closeBtn: "閉じる",
+    backMain: "メインメニュー", backDest: "目的地へ戻る", backPlaces: "観光地へ戻る", chooseGov: "目的地を選択",
+    carTitle: "🚗 プロの運転手付きレンタカー", carDesc: "自分のペースで自由に旅を！最新のエアコン完備車とプロの運転手をご用意します。",
+    airportTitle: "✈️ 安心の空港送迎", airportDesc: "疲れずに旅を始めましょう！到着時にお待ちしています。",
+    loading: "読み込み中...", loadError: "データを読み込めませんでした。", empty: "表示する項目がありません。"
+  }
+};
+
+/* ================= المنطق ================= */
+
+let lang = "en", waMsg = "", slideIdx = 0, slideTimer = null;
+let destinations = [], currentDest = null, currentPlaces = null, detail = null;
+const $ = id => document.getElementById(id);
+const t = k => (translations[lang] && translations[lang][k]) || translations.en[k] || "";
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const thumb = id => `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+const screens = ["main-hub-screen", "sightseeing-screen", "car-rental-screen", "airport-transfer-screen", "gov-screen", "detail-screen"];
+
+// اسم العرض من اسم الفولدر
+function dispName(name, l = lang) {
+  const clean = name.replace(/^\d{1,2}\s*[._-]\s*/, "");
+  const parts = clean.split("|").map(s => s.trim());
+  return parts.length > 1 ? (l === "ar" ? parts[1] : parts[0]) : parts[0];
+}
+
+/* Drive API */
+const cache = {};
+async function listFolder(id) {
+  if (cache[id]) return cache[id];
+  const q = encodeURIComponent(`'${id}' in parents and trashed=false`);
+  const fields = encodeURIComponent("files(id,name,mimeType)");
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&orderBy=name&pageSize=200&key=${DRIVE_API_KEY}`);
+  if (!res.ok) throw new Error("Drive API " + res.status);
+  const files = (await res.json()).files || [];
+  return (cache[id] = {
+    folders: files.filter(f => f.mimeType === "application/vnd.google-apps.folder"),
+    images: files.filter(f => f.mimeType.startsWith("image/"))
+  });
+}
+
+/* التنقل */
+const defaultMsgs = {
+  "main-hub-screen": "Hello Gem Travel, I would like more information and general booking.",
+  "sightseeing-screen": "Hello Gem Travel, I want to inquire about sightseeing and excursions.",
+  "car-rental-screen": "Hello Gem Travel, I want to inquire about Car Rental with Driver.",
+  "airport-transfer-screen": "Hello Gem Travel, I want to book an Airport Transfer."
+};
+function openScreen(id) {
+  stopSlides();
+  screens.forEach(s => $(s).classList.toggle("hidden", s !== id));
+  if (defaultMsgs[id]) waMsg = defaultMsgs[id];
+  window.scrollTo(0, 0);
+}
+function goMainHub() { openScreen("main-hub-screen"); }
+
+/* الوجهات */
+async function openSightseeing() {
+  openScreen("sightseeing-screen");
+  const grid = $("gov-grid");
+  grid.innerHTML = `<div class="status">${t("loading")}</div>`;
+  try {
+    destinations = (await listFolder(ROOT_FOLDER_ID)).folders;
+    renderDestinations();
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML = `<div class="status err">${t("loadError")}</div>`;
+  }
+}
+function renderDestinations() {
+  $("gov-grid").innerHTML = destinations.length
+    ? destinations.map((d, i) => `<div class="btn-card" onclick="openDest(${i})">${esc(dispName(d.name))}</div>`).join("")
+    : `<div class="status">${t("empty")}</div>`;
+}
+
+/* الأماكن داخل الوجهة */
+async function openDest(i) {
+  currentDest = destinations[i];
+  openScreen("gov-screen");
+  $("gov-title").textContent = dispName(currentDest.name);
+  waMsg = `Hello Gem Travel, I want to inquire about excursions in ${dispName(currentDest.name, "en")}.`;
+  const box = $("gov-content");
+  box.innerHTML = `<div class="status">${t("loading")}</div>`;
+  try {
+    const { folders, images } = await listFolder(currentDest.id);
+    if (!folders.length) {            // مفيش فولدرات أماكن: اعرض صور الوجهة على طول
+      currentPlaces = null;
+      if (images.length) return showDetail({ name: currentDest.name, images }, true);
+      box.innerHTML = `<div class="status">${t("empty")}</div>`;
+      return;
+    }
+    currentPlaces = await Promise.all(folders.map(async f => ({ name: f.name, images: (await listFolder(f.id)).images })));
+    renderPlaces();
+  } catch (e) {
+    console.error(e);
+    box.innerHTML = `<div class="status err">${t("loadError")}</div>`;
+  }
+}
+function renderPlaces() {
+  $("gov-content").innerHTML = currentPlaces.map((p, i) =>
+    `<div class="place-card" onclick="showDetail(currentPlaces[${i}])">
+       ${p.images[0] ? `<img src="${thumb(p.images[0].id)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : ""}
+       <div>${esc(dispName(p.name))}</div></div>`).join("");
+}
+function backFromDetail() { currentPlaces ? openScreenGov() : openSightseeing(); }
+function openScreenGov() { openScreen("gov-screen"); waMsg = `Hello Gem Travel, I want to inquire about excursions in ${dispName(currentDest.name, "en")}.`; }
+
+/* التفاصيل + السلايد شو */
+function showDetail(d) {
+  detail = d;
+  openScreen("detail-screen");
+  $("place-title").textContent = dispName(d.name);
+  const imgs = d.images, multi = imgs.length > 1;
+  $("slider-container").innerHTML = imgs.length
+    ? imgs.map((im, n) => `<div class="mySlides${n === 0 ? " active" : ""}"><img src="${thumb(im.id)}" alt="${esc(dispName(d.name))}" onerror="this.style.opacity=.2"></div>`).join("") +
+      (multi ? `<button class="slide-nav prev" onclick="moveSlide(-1)">❮</button><button class="slide-nav next" onclick="moveSlide(1)">❯</button><div class="slide-count" id="slide-count">1/${imgs.length}</div>` : "")
+    : `<div class="status" style="color:#fff">${t("empty")}</div>`;
+  waMsg = `Hello Gem Travel, I want to inquire/book: ${dispName(d.name, "en")}` + (currentDest ? ` (${dispName(currentDest.name, "en")})` : "");
+  slideIdx = 0;
+  if (multi) slideTimer = setInterval(() => moveSlide(1, true), 4000);
+}
+function moveSlide(d, auto) {
+  const s = document.querySelectorAll(".mySlides");
+  if (!s.length) return;
+  s[slideIdx].classList.remove("active");
+  slideIdx = (slideIdx + d + s.length) % s.length;
+  s[slideIdx].classList.add("active");
+  const c = $("slide-count");
+  if (c) c.textContent = `${slideIdx + 1}/${s.length}`;
+  if (!auto && slideTimer) { clearInterval(slideTimer); slideTimer = setInterval(() => moveSlide(1, true), 4000); }
+}
+function stopSlides() { if (slideTimer) { clearInterval(slideTimer); slideTimer = null; } }
+
+/* الواتساب */
+function openWhatsAppModal(text) {
+  const box = $("wa-options-container");
+  box.innerHTML = "";
+  teamContacts.forEach(c => {
+    const num = c.number.replace(/\D/g, "").replace(/^00/, "");
+    const a = document.createElement("a");
+    a.href = `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.className = "wa-number-option";
+    a.textContent = `🟢 ${c.name}`;
+    a.onclick = closeWhatsAppModal;
+    box.appendChild(a);
+  });
+  $("waModal").style.display = "flex";
+}
+function closeWhatsAppModal() { $("waModal").style.display = "none"; }
+
+/* اللغة */
+function changeLanguage(l) {
+  lang = l;
+  const root = $("html-root");
+  root.lang = l;
+  root.dir = l === "ar" ? "rtl" : "ltr";
+  $("languageSelect").value = l;
+  const map = {
+    "header-subtitle": "subtitle", "txt-main-title": "mainTitle", "btn-sightseeing": "sightseeing", "btn-car-rental": "carRental",
+    "btn-airport-transfer": "airportTransfer", "fab-text": "fab", "modal-title": "modalTitle", "modal-close-btn": "closeBtn",
+    "txt-choose-gov": "chooseGov", "car-title": "carTitle", "car-desc": "carDesc", "airport-title": "airportTitle", "airport-desc": "airportDesc"
+  };
+  Object.entries(map).forEach(([id, key]) => $(id).textContent = t(key));
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  // إعادة رسم الشاشة المفتوحة (من الكاش، من غير طلبات جديدة)
+  if (!$("sightseeing-screen").classList.contains("hidden") && destinations.length) renderDestinations();
+  else if (!$("gov-screen").classList.contains("hidden") && currentDest) { $("gov-title").textContent = dispName(currentDest.name); if (currentPlaces) renderPlaces(); }
+  else if (!$("detail-screen").classList.contains("hidden") && detail) { $("place-title").textContent = dispName(detail.name); }
+}
+
+changeLanguage("en");
+goMainHub();
+</script>
+</body>
+</html>
