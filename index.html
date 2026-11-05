@@ -39,6 +39,7 @@ header{background:var(--primary-color);color:#fff;width:100%;padding:15px 20px;d
 .place-card img{width:100%;height:150px;object-fit:cover;display:block;background:#e2e8f0}
 .place-card div{padding:12px 15px;font-weight:bold;color:var(--primary-color)}
 .status{text-align:center;padding:30px 10px;color:#64748b;grid-column:1/-1}
+.place-card img.image-unavailable{display:none}
 /* زرار الواتساب العايم */
 .wa-fab{position:fixed;z-index:900;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));width:calc(100% - 32px);max-width:568px;background:#25d366;color:#fff;border:none;border-radius:50px;padding:15px 20px;font-size:15px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 16px rgba(37,211,102,.45);font-family:inherit}
 .wa-fab:hover{background:#20ba5a}
@@ -84,6 +85,7 @@ header{background:var(--primary-color);color:#fff;width:100%;padding:15px 20px;d
   <div id="sightseeing-screen" class="hidden">
     <button class="back-btn" data-t="backMain" onclick="goMainHub()"></button>
     <div class="section-title" id="txt-choose-gov"></div>
+    <div class="status" id="catalog-status" role="status" aria-live="polite">Loading sightseeing catalog…</div>
     <div class="grid" id="gov-grid"></div>
   </div>
 
@@ -122,6 +124,9 @@ header{background:var(--primary-color);color:#fff;width:100%;padding:15px 20px;d
 
 <script>
 /* ================= الإعدادات وأرقام الفريق ================= */
+// Paste the deployed Google Apps Script Web App URL ending in /exec here.
+const DRIVE_API_URL = "https://script.google.com/macros/s/AKfycbyV1SXzJm7QtbnFQbew4mAXPm8e_o0bLjehCb1rDPLzBW00v989ujDtFxVGFBIoMzvCjg/exec";
+const DRIVE_API_TIMEOUT_MS = 20000;
 const teamContacts = [
   { name: "باسل سعيد", number: "201062519011" },
   { name: "أمجد حلمي", number: "201284234111" }
@@ -134,7 +139,8 @@ const translations = {
     fab: "للتواصل لمزيد من المعلومات والحجز", modalTitle: "اختر الشخص المناسب لمراسلته عبر الواتساب", closeBtn: "إغلاق",
     backMain: "القائمة الرئيسية", backDest: "العودة للوجهات", backPlaces: "رجوع للأماكن", chooseGov: "اختر الوجهة السياحية",
     carTitle: "🚗 تأجير سيارات مع سائق محترف", carDesc: "استمتع براحة الحرية والاستكشاف على طريقتك الخاصة! نوفر لك سيارات حديثة ومكيفة بالكامل مع نخبة من السائقين المحترفين.",
-    airportTitle: "✈️ انتقالات المطار بكل سهولة وأمان", airportDesc: "ابدأ رحلتك بلا إرهاق! نحن في انتظارك لحظة هبوط طائرتك لضمان وصولك بكل أمان وراحة."
+    airportTitle: "✈️ انتقالات المطار بكل سهولة وأمان", airportDesc: "ابدأ رحلتك بلا إرهاق! نحن في انتظارك لحظة هبوط طائرتك لضمان وصولك بكل أمان وراحة.",
+    catalogLoading: "جارٍ تحميل الوجهات السياحية…", catalogError: "تعذر تحميل كتالوج الرحلات. تحقق من اتصال الإنترنت أو إعدادات واجهة Google Drive ثم أعد المحاولة.", catalogEmpty: "لا توجد وجهات أو صور متاحة حالياً.", backCategory: "العودة للتصنيفات", noImages: "لا توجد صور متاحة لهذا المكان.", retry: "إعادة المحاولة"
   },
   en: {
     subtitle: "Travel Agencies - Explore Egypt", mainTitle: "Welcome to Gem Travel - Select Service",
@@ -142,7 +148,8 @@ const translations = {
     fab: "Contact for More Information & Booking", modalTitle: "Select Team Member to Contact via WhatsApp", closeBtn: "Close",
     baseName: "Main Menu", backMain: "Main Menu", backDest: "Back to Destinations", backPlaces: "Back to Places", chooseGov: "Select Destination",
     carTitle: "🚗 Car Rental with Professional Driver", carDesc: "Enjoy freedom and exploration at your own pace! We offer modern, fully air-conditioned cars with professional drivers for a stress-free journey.",
-    airportTitle: "✈️ Seamless Airport Transfers", airportDesc: "Start your trip without any fatigue! We will be waiting for you the moment your plane lands to ensure a smooth arrival."
+    airportTitle: "✈️ Seamless Airport Transfers", airportDesc: "Start your trip without any fatigue! We will be waiting for you the moment your plane lands to ensure a smooth arrival.",
+    catalogLoading: "Loading sightseeing destinations…", catalogError: "Could not load the sightseeing catalog. Check your connection and Google Drive API deployment, then try again.", catalogEmpty: "No destinations or images are currently available.", backCategory: "Back to Categories", noImages: "No images are available for this place.", retry: "Retry"
   },
   fr: {
     subtitle: "Agence de voyage - Découvrez l'Égypte", mainTitle: "Bienvenue chez Gem Travel - Choisissez un service",
@@ -150,7 +157,8 @@ const translations = {
     fab: "Contact pour plus d'informations & réservation", modalTitle: "Choisissez la personne à contacter sur WhatsApp", closeBtn: "Fermer",
     backMain: "Menu principal", backDest: "Retour aux destinations", backPlaces: "Retour aux lieux", chooseGov: "Choisissez la destination",
     carTitle: "🚗 Location de voiture avec chauffeur professionnel", carDesc: "Profitez de la liberté à votre rythme ! Voitures modernes et climatisées avec chauffeurs professionnels.",
-    airportTitle: "✈️ Transferts aéroport sans stress", airportDesc: "Commencez votre voyage sans fatigue ! Nous vous attendons dès l'atterrissage de votre avion."
+    airportTitle: "✈️ Transferts aéroport sans stress", airportDesc: "Commencez votre voyage sans fatigue ! Nous vous attendons dès l'atterrissage de votre avion.",
+    catalogLoading: "Chargement des destinations…", catalogError: "Impossible de charger le catalogue. Vérifiez la connexion et le déploiement de l’API Google Drive, puis réessayez.", catalogEmpty: "Aucune destination ni image disponible.", backCategory: "Retour aux catégories", noImages: "Aucune image disponible pour ce lieu.", retry: "Réessayer"
   },
   es: {
     subtitle: "Agencia de viajes - Explora Egipto", mainTitle: "Bienvenido a Gem Travel - Elige un servicio",
@@ -158,7 +166,8 @@ const translations = {
     fab: "Contacto para más información y reservas", modalTitle: "Elige con quién hablar por WhatsApp", closeBtn: "Cerrar",
     backMain: "Menú principal", backDest: "Volver a destinos", backPlaces: "Volver a lugares", chooseGov: "Elige el destino",
     carTitle: "🚗 Alquiler de coche con conductor profesional", carDesc: "¡Disfruta de la libertad a tu ritmo! Coches modernos con aire acondicionado y conductores profesionales.",
-    airportTitle: "✈️ Traslados al aeropuerto sin complicaciones", airportDesc: "¡Empieza tu viaje sin cansancio! Te esperamos en cuanto aterrice tu avión."
+    airportTitle: "✈️ Traslados al aeropuerto sin complicaciones", airportDesc: "¡Empieza tu viaje sin cansancio! Te esperamos en cuanto aterrice tu avión.",
+    catalogLoading: "Cargando destinos…", catalogError: "No se pudo cargar el catálogo. Comprueba la conexión y la implementación de la API de Google Drive e inténtalo de nuevo.", catalogEmpty: "No hay destinos ni imágenes disponibles.", backCategory: "Volver a categorías", noImages: "No hay imágenes disponibles para este lugar.", retry: "Reintentar"
   },
   zh: {
     subtitle: "旅行社 - 探索埃及", mainTitle: "欢迎来到 Gem Travel - 请选择服务",
@@ -166,7 +175,8 @@ const translations = {
     fab: "联系我们了解更多信息与预订", modalTitle: "选择要通过 WhatsApp 联系的人员", closeBtn: "关闭",
     backMain: "主菜单", backDest: "返回目的地", backPlaces: "返回景点", chooseGov: "选择目的地",
     carTitle: "🚗 专业司机包车服务", carDesc: "按自己的节奏自由探索！我们提供现代化全空调车辆和专业司机。",
-    airportTitle: "✈️ 轻松机场接送", airportDesc: "让旅程从轻松开始！飞机降落时我们就在等您。"
+    airportTitle: "✈️ 轻松机场接送", airportDesc: "让旅程从轻松开始！飞机降落时我们就在等您。",
+    catalogLoading: "正在加载旅游目的地…", catalogError: "无法加载目录。请检查网络连接和 Google Drive API 部署，然后重试。", catalogEmpty: "目前没有可用的目的地或图片。", backCategory: "返回分类", noImages: "此地点暂无可用图片。", retry: "重试"
   },
   ja: {
     subtitle: "旅行代理店 - エジプトを探索", mainTitle: "Gem Travel へようこそ - サービスを選択",
@@ -174,136 +184,270 @@ const translations = {
     fab: "詳細・ご予約はこちらからご連絡ください", modalTitle: "WhatsAppで連絡する担当者を選択", closeBtn: "閉じる",
     backMain: "メインメニュー", backDest: "目的地へ戻る", backPlaces: "観光地へ戻る", chooseGov: "目的地を選択",
     carTitle: "🚗 プロの運転手付きレンタカー", carDesc: "自分のペースで自由に旅を！最新のエアコン完備車とプロの運転手をご用意します。",
-    airportTitle: "✈️ 安心の空港送迎", airportDesc: "疲れずに旅を始めましょう！到着時にお待ちしています。"
+    airportTitle: "✈️ 安心の空港送迎", airportDesc: "疲れずに旅を始めましょう！到着時にお待ちしています。",
+    catalogLoading: "観光地を読み込んでいます…", catalogError: "カタログを読み込めません。接続と Google Drive API のデプロイ設定を確認して、再試行してください。", catalogEmpty: "現在、利用できる目的地や画像はありません。", backCategory: "カテゴリに戻る", noImages: "この場所で利用できる画像はありません。", retry: "再試行"
   }
 };
 
-/* قاعدة بيانات الوجهات والأماكن والصور مباشرة داخل الكود لتجنب أخطاء الدرايف والمتحكمات */
-const tourData = [
-  {
-    id: "cairo",
-    name: { ar: "القاهرة", en: "Cairo", fr: "Le Caire", es: "El Cairo", zh: "开罗", ja: "カイロ" },
-    places: [
-      {
-        name: { ar: "أهرامات الجيزة وأبو الهول", en: "Pyramids of Giza & Sphinx", fr: "Pyramides de Gizeh", es: "Pirámides de Giza", zh: "吉萨金字塔", ja: "ギザのピラミッド" },
-        images: [
-          "https://images.unsplash.com/photo-1539650116574-8efeb43e2750",
-          "https://images.unsplash.com/photo-1503177119275-0aa32b3a93eb"
-        ]
-      },
-      {
-        name: { ar: "المتحف المصري الكبير", en: "Grand Egyptian Museum", fr: "Grand Musée Égyptien", es: "Gran Museo Egipcio", zh: "大埃及博物馆", ja: "大エジプト博物館" },
-        images: [
-          "https://images.unsplash.com/photo-1564507592333-c60657eea523",
-          "https://images.unsplash.com/photo-1568322445760-727c66798c8c"
-        ]
-      },
-      {
-        name: { ar: "قلعة صلاح الدين ومسجد محمد علي", en: "Cairo Citadel & Mohamed Ali Mosque", fr: "Citadelle du Caire", es: "Ciudadela de El Cairo", zh: "开罗城堡", ja: "カイロ城" },
-        images: [
-          "https://images.unsplash.com/photo-1572252009286-268acec5ca0a",
-          "https://images.unsplash.com/photo-1544816155-12df9643f363"
-        ]
-      }
-    ]
-  },
-  {
-    id: "alex",
-    name: { ar: "الإسكندرية", en: "Alexandria", fr: "Alexandrie", es: "Alejandría", zh: "亚历山大", ja: "アレクサンドリア" },
-    places: [
-      {
-        name: { ar: "قلعة قايتباي", en: "Qaitbay Citadel", fr: "Citadelle de Qaitbay", es: "Ciudadela de Qaitbay", zh: "盖特拜城堡", ja: "カイトベイ要塞" },
-        images: [
-          "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7",
-          "https://images.unsplash.com/photo-1541872703-74c5e44368f9"
-        ]
-      },
-      {
-        name: { ar: "مكتبة الإسكندرية", en: "Bibliotheca Alexandrina", fr: "Bibliothèque d'Alexandrie", es: "Biblioteca Alejandrina", zh: "亚历山大图书馆", ja: "アレクサンドリア図書館" },
-        images: [
-          "https://images.unsplash.com/photo-1541872703-74c5e44368f9",
-          "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7"
-        ]
-      }
-    ]
-  },
-  {
-    id: "aswan",
-    name: { ar: "أسوان", en: "Aswan", fr: "Assouan", es: "Asuán", zh: "阿斯旺", ja: "アスワン" },
-    places: [
-      {
-        name: { ar: "معابد أبو سمبل", en: "Abu Simbel Temples", fr: "Temples d'Abou Simbel", es: "Templos de Abu Simbel", zh: "阿布辛贝神庙", ja: "アブ・シンベル神殿" },
-        images: [
-          "https://images.unsplash.com/photo-1564507592333-c60657eea523",
-          "https://images.unsplash.com/photo-1539650116574-8efeb43e2750"
-        ]
-      },
-      {
-        name: { ar: "معبد فيلة والقرية النوبية", en: "Philae Temple & Nubian Village", fr: "Temple de Philae", es: "Templo de File", zh: "菲莱神庙", ja: "フィラエ神殿" },
-        images: [
-          "https://images.unsplash.com/photo-1544816155-12df9643f363",
-          "https://images.unsplash.com/photo-1564507592333-c60657eea523"
-        ]
-      }
-    ]
-  },
-  {
-    id: "luxor",
-    name: { ar: "الأقصر", en: "Luxor", fr: "Louxor", es: "Luxor", zh: "卢克索", ja: "ルクソール" },
-    places: [
-      {
-        name: { ar: "مجمع معابد الكرنك", en: "Karnak Temple Complex", fr: "Complexe templier de Karnak", es: "Templo de Karnak", zh: "卡纳克神庙", ja: "カルナック神殿" },
-        images: [
-          "https://images.unsplash.com/photo-1608953151270-2495edab4fb6",
-          "https://images.unsplash.com/photo-1568322445760-727c66798c8c"
-        ]
-      },
-      {
-        name: { ar: "وادي الملوك", en: "Valley of the Kings", fr: "Vallée des Rois", es: "Valle de los Reyes", zh: "帝王谷", ja: "王家の谷" },
-        images: [
-          "https://images.unsplash.com/photo-1568322445760-727c66798c8c",
-          "https://images.unsplash.com/photo-1608953151270-2495edab4fb6"
-        ]
-      }
-    ]
-  },
-  {
-    id: "sharm",
-    name: { ar: "شرم الشيخ", en: "Sharm El Sheikh", fr: "Charm el-Cheikh", es: "Sharm el-Sheij", zh: "沙姆沙伊赫", ja: "シャルム・エル・シェイク" },
-    places: [
-      {
-        name: { ar: "محمية رأس محمد", en: "Ras Mohamed National Park", fr: "Parc national Ras Mohamed", es: "Parque Nacional Ras Mohamed", zh: "穆罕默德国家公园", ja: "ラス・モハメッド国立公園" },
-        images: [
-          "https://images.unsplash.com/photo-1544551763-46a013bb70d5",
-          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
-        ]
-      }
-    ]
-  },
-  {
-    id: "hurghada",
-    name: { ar: "الغردقة", en: "Hurghada", fr: "Hourghada", es: "Hurgada", zh: "洪加达", ja: "フルガダ" },
-    places: [
-      {
-        name: { ar: "رحلة جزيرة جفتون والسنوركلنج", en: "Giftun Island Snorkeling", fr: "Île Giftun", es: "Isla Giftun", zh: "吉夫顿岛", ja: "ギフトン島" },
-        images: [
-          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-          "https://images.unsplash.com/photo-1544551763-46a013bb70d5"
-        ]
-      }
-    ]
-  }
-];
-
+/* Sightseeing catalog is built only from the Google Drive JSON database. */
+let tourData = [];
+let catalogLoaded = false;
+let catalogLoading = false;
+let catalogError = false;
 let lang = "en", waMsg = "", slideIdx = 0, slideTimer = null;
-let currentDest = null, currentPlace = null;
+let currentDest = null, currentPlace = null, currentCategory = null;
 const $ = id => document.getElementById(id);
 const t = k => (translations[lang] && translations[lang][k]) || translations.en[k] || "";
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const screens = ["main-hub-screen", "sightseeing-screen", "car-rental-screen", "airport-transfer-screen", "gov-screen", "detail-screen"];
 
 function getName(obj) {
-  return obj[lang] || obj['en'] || obj['ar'];
+  if (typeof obj === "string") return obj;
+  if (!obj || typeof obj !== "object") return "";
+  return obj[lang] || obj.en || obj.ar || obj.sourceLabel || obj.name || "";
+}
+
+function setCatalogStatus(message, isError) {
+  const status = $("catalog-status");
+  if (!status) return;
+  status.textContent = message;
+  status.classList.toggle("hidden", !message);
+  status.style.color = isError ? "#b91c1c" : "";
+}
+
+function loadDriveCatalog() {
+  if (catalogLoading) return;
+  if (!DRIVE_API_URL || DRIVE_API_URL.includes("PASTE_YOUR_")) {
+    catalogError = true;
+    catalogLoaded = false;
+    setCatalogStatus(t("catalogError"), true);
+    return;
+  }
+  catalogLoading = true;
+  catalogError = false;
+  setCatalogStatus(t("catalogLoading"), false);
+  const callbackName = "gemTravelCatalogCallback";
+  const oldScript = $("gem-drive-api-script");
+  if (oldScript) oldScript.remove();
+  if (window.gemTravelCatalogTimeout) clearTimeout(window.gemTravelCatalogTimeout);
+  window[callbackName] = function(payload) {
+    clearTimeout(window.gemTravelCatalogTimeout);
+    catalogLoading = false;
+    delete window[callbackName];
+    const script = $("gem-drive-api-script");
+    if (script) script.remove();
+    // Accept both the currently deployed Apps Script shape (success/data)
+    // and the newer shape (ok/records), without requiring another deployment.
+    const records = payload && (Array.isArray(payload.data) ? payload.data : payload.records);
+    const apiSucceeded = payload && (payload.success === true || payload.ok === true);
+    if (!apiSucceeded || !Array.isArray(records)) {
+      catalogError = true;
+      catalogLoaded = false;
+      setCatalogStatus((payload && payload.error) || t("catalogError"), true);
+      if (!$("sightseeing-screen").classList.contains("hidden")) showCatalogError();
+      return;
+    }
+    try {
+      tourData = buildCatalog(records);
+      catalogLoaded = true;
+      catalogError = false;
+      if (!$("sightseeing-screen").classList.contains("hidden")) renderDestinations();
+    } catch (err) {
+      console.error("Catalog processing failed:", err);
+      catalogError = true;
+      catalogLoaded = false;
+      setCatalogStatus(t("catalogError"), true);
+    }
+  };
+  const script = document.createElement("script");
+  script.id = "gem-drive-api-script";
+  script.async = true;
+  script.onerror = function() {
+    clearTimeout(window.gemTravelCatalogTimeout);
+    catalogLoading = false;
+    catalogError = true;
+    catalogLoaded = false;
+    delete window[callbackName];
+    script.remove();
+    if (!$("sightseeing-screen").classList.contains("hidden")) showCatalogError();
+  };
+  script.src = DRIVE_API_URL + (DRIVE_API_URL.includes("?") ? "&" : "?") + "callback=" + callbackName + "&ts=" + Date.now();
+  window.gemTravelCatalogTimeout = setTimeout(function() {
+    if (catalogLoading) {
+      catalogLoading = false;
+      catalogError = true;
+      catalogLoaded = false;
+      delete window[callbackName];
+      script.remove();
+      if (!$("sightseeing-screen").classList.contains("hidden")) showCatalogError();
+    }
+  }, DRIVE_API_TIMEOUT_MS);
+  document.head.appendChild(script);
+}
+
+function normalizeFolderName(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .trim()
+    .toLowerCase()
+    .replace(/[._-]+/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function canonicalDestinationName(value) {
+  const key = normalizeFolderName(value)
+    .replace(/\s+governorate$/i, "")
+    .replace(/\s+gov\.?$/i, "")
+    .trim();
+
+  const aliases = {
+    "alex": "alexandria", "alexandria": "alexandria", "alexanderia": "alexandria",
+    "el alexandria": "alexandria", "al iskandariyah": "alexandria",
+    "al iskandariya": "alexandria", "iskandariya": "alexandria", "iskandaria": "alexandria",
+    "cairo": "cairo", "al qahirah": "cairo", "el qahira": "cairo",
+    "luxor": "luxor", "al uqsor": "luxor", "al uqsur": "luxor",
+    "el uqsor": "luxor", "el uqsur": "luxor", "al uqsūr": "luxor",
+    "الأقصر": "luxor", "الاقصر": "luxor", "محافظة الأقصر": "luxor", "محافظة الاقصر": "luxor",
+    "aswan": "aswan", "aswan governorate": "aswan", "أسوان": "aswan", "اسوان": "aswan",
+    "sharm": "sharm el sheikh", "sharm el sheikh": "sharm el sheikh", "sharm elsheikh": "sharm el sheikh",
+    "hurghada": "hurghada", "el hurghada": "hurghada"
+  };
+
+  return aliases[key] || key;
+}
+
+function isKnownDestinationSegment(value) {
+  const key = canonicalDestinationName(value);
+  return ["cairo", "alexandria", "luxor", "aswan", "sharm el sheikh", "hurghada"].includes(key);
+}
+
+function buildCatalog(records) {
+  if (!Array.isArray(records)) throw new Error("API records must be an array");
+
+  const destinations = new Map();
+  const seenIds = new Set();
+
+  records.forEach(record => {
+    if (!record || typeof record.folder !== "string") return;
+
+    const parts = record.folder.split("/").map(x => x.trim()).filter(Boolean);
+    const rootIndex = parts.findIndex(x => normalizeFolderName(x) === "gem excursions");
+    if (rootIndex < 0 || !parts[rootIndex + 1]) return;
+
+    // Usually the governorate is the first folder after Gem_Excursions.
+    // Also tolerate an optional Egypt/Egypt Governorates parent folder.
+    let destinationIndex = rootIndex + 1;
+    if (parts[destinationIndex] && ["egypt", "egypt governorates", "governorates"].includes(normalizeFolderName(parts[destinationIndex]))) {
+      destinationIndex++;
+    }
+    // If the folder has an extra wrapper, prefer a recognized governorate
+    // in the next two levels (e.g. Gem_Excursions/Egypt/Luxor/...).
+    if (!isKnownDestinationSegment(parts[destinationIndex]) && isKnownDestinationSegment(parts[destinationIndex + 1])) {
+      destinationIndex++;
+    }
+
+    const destinationSource = parts[destinationIndex];
+    const destinationKey = canonicalDestinationName(destinationSource);
+    if (!destinationKey || ["sharm el sheikh", "hurghada"].includes(destinationKey)) return;
+
+    const relativeParts = parts.slice(destinationIndex + 1);
+    if (!relativeParts.length) return;
+
+    // The API is expected to return image records. Accept either id/url or
+    // construct the standard Drive view URL from the file id.
+    const imageId = typeof record.id === "string" ? record.id : "";
+    const imageUrl = typeof record.url === "string" && record.url
+      ? record.url
+      : (imageId ? `https://drive.google.com/uc?export=view&id=${encodeURIComponent(imageId)}` : "");
+    if (!imageUrl || (!imageId && seenIds.has(imageUrl))) return;
+    const uniqueKey = imageId || imageUrl;
+    if (seenIds.has(uniqueKey)) return;
+    seenIds.add(uniqueKey);
+
+    if (!destinations.has(destinationKey)) {
+      destinations.set(destinationKey, {
+        id: destinationKey,
+        sourceLabel: destinationKey === "alexandria" ? "Alexandria" : destinationSource,
+        name: destinationLabels[destinationKey] || { en: destinationSource, ar: destinationSource },
+        places: [],
+        categories: new Map(),
+        _directPlaces: new Map()
+      });
+    }
+
+    const dest = destinations.get(destinationKey);
+    const placeLabel = relativeParts[relativeParts.length - 1];
+    const placePath = relativeParts.join("/");
+    const image = { name: record.name || "", id: imageId, url: imageUrl };
+
+    // A place directly under a governorate has one path segment.
+    // Any additional levels are treated as category/subcategory/place.
+    if (relativeParts.length >= 2) {
+      const categoryPath = relativeParts.slice(0, -1).join("/");
+      if (!dest.categories.has(categoryPath)) {
+        dest.categories.set(categoryPath, {
+          name: relativeParts[relativeParts.length - 2],
+          sourceLabel: categoryPath,
+          places: [],
+          _places: new Map()
+        });
+      }
+      const category = dest.categories.get(categoryPath);
+      if (!category._places.has(placePath)) {
+        category._places.set(placePath, {
+          name: placeLabel,
+          sourceLabel: placeLabel,
+          path: placePath,
+          images: []
+        });
+      }
+      category._places.get(placePath).images.push(image);
+    } else {
+      if (!dest._directPlaces.has(placePath)) {
+        dest._directPlaces.set(placePath, {
+          name: placeLabel,
+          sourceLabel: placeLabel,
+          path: placePath,
+          images: []
+        });
+      }
+      dest._directPlaces.get(placePath).images.push(image);
+    }
+  });
+
+  return Array.from(destinations.values()).map(dest => {
+    dest.places = Array.from(dest._directPlaces.values());
+    delete dest._directPlaces;
+    dest.categories = Array.from(dest.categories.values()).map(category => {
+      category.places = Array.from(category._places.values());
+      delete category._places;
+      return category;
+    });
+    return dest;
+  }).sort((a, b) => getName(a.name).localeCompare(getName(b.name)));
+}
+
+const destinationLabels = {
+  cairo: { ar: "القاهرة", en: "Cairo", fr: "Le Caire", es: "El Cairo", zh: "开罗", ja: "カイロ" },
+  alex: { ar: "الإسكندرية", en: "Alexandria", fr: "Alexandrie", es: "Alejandría", zh: "亚历山大", ja: "アレクサンドリア" },
+  alexandria: { ar: "الإسكندرية", en: "Alexandria", fr: "Alexandrie", es: "Alejandría", zh: "亚历山大", ja: "アレクサンドリア" },
+  luxor: { ar: "الأقصر", en: "Luxor", fr: "Louxor", es: "Luxor", zh: "卢克索", ja: "ルクソール" },
+  aswan: { ar: "أسوان", en: "Aswan", fr: "Assouan", es: "Asuán", zh: "阿斯旺", ja: "アスワン" }
+};
+
+function placeLabel(place) {
+  return getName(place.labels || place.translations || place.name) || place.sourceLabel || "";
+}
+
+function showCatalogError() {
+  const grid = $("gov-grid");
+  grid.innerHTML = `<div class="status">${esc(t("catalogError"))}<br><button class="back-btn" type="button" onclick="retryCatalog()">${esc(t("retry"))}</button></div>`;
+  setCatalogStatus("", true);
+}
+
+function retryCatalog() {
+  catalogLoading = false;
+  loadDriveCatalog();
 }
 
 const defaultMsgs = {
@@ -324,50 +468,152 @@ function goMainHub() { openScreen("main-hub-screen"); }
 
 function openSightseeing() {
   openScreen("sightseeing-screen");
+  if (catalogLoaded) renderDestinations();
+  else if (catalogLoading) setCatalogStatus(t("catalogLoading"), false);
+  else if (catalogError) showCatalogError();
+  else loadDriveCatalog();
+}
+
+function renderDestinations() {
   const grid = $("gov-grid");
-  grid.innerHTML = tourData.map((d, i) => `<div class="btn-card" onclick="openDest(${i})">${esc(getName(d.name))}</div>`).join("");
+  grid.innerHTML = "";
+  if (!tourData.length) {
+    setCatalogStatus(t("catalogEmpty"), false);
+    return;
+  }
+  setCatalogStatus("", false);
+  grid.innerHTML = tourData.map((d, i) =>
+    `<button class="btn-card" type="button" onclick="openDest(${i})" title="${esc(d.sourceLabel)}">${esc(getName(d.name))}</button>`
+  ).join("");
 }
 
 function openDest(i) {
   currentDest = tourData[i];
+  currentCategory = null;
+  if (!currentDest) return;
   openScreen("gov-screen");
-  $("gov-title").textContent = getName(currentDest.name);
-  waMsg = `Hello Gem Travel, I want to inquire about excursions in ${currentDest.name.en}.`;
-  
-  $("gov-content").innerHTML = currentDest.places.map((p, idx) =>
-    `<div class="place-card" onclick="showDetail(${i}, ${idx})">
-       ${p.images[0] ? `<img src="${p.images[0]}" alt="" loading="lazy">` : ""}
-       <div>${esc(getName(p.name))}</div></div>`).join("");
+  renderDestinationContent();
 }
 
-function backFromDetail() { openDest(tourData.indexOf(currentDest)); }
+function renderDestinationContent() {
+  if (!currentDest) return;
+  const title = $("gov-title");
+  const content = $("gov-content");
+  const back = document.querySelector('#gov-screen [data-t="backDest"]');
+  if (currentCategory) {
+    title.textContent = `${getName(currentDest.name)} — ${currentCategory.name}`;
+    if (back) {
+      back.textContent = t("backCategory");
+      back.onclick = () => { stopSlides(); currentCategory = null; currentPlace = null; renderDestinationContent(); };
+    }
+    content.innerHTML = renderPlaceCards(currentCategory.places, tourData.indexOf(currentDest), true);
+    waMsg = `Hello Gem Travel, I want to inquire about ${currentCategory.name} in ${currentDest.sourceLabel}.`;
+    return;
+  }
 
-function showDetail(destIdx, placeIdx) {
+  title.textContent = getName(currentDest.name);
+  if (back) {
+    back.textContent = t("backDest");
+    back.onclick = openSightseeing;
+  }
+  const categoryCards = (currentDest.categories || []).map((category, idx) =>
+    `<button class="btn-card" type="button" onclick="openCategory(${idx})">${esc(category.name)}</button>`
+  ).join("");
+  const directCards = renderPlaceCards(currentDest.places || [], tourData.indexOf(currentDest), false);
+  content.innerHTML = (categoryCards ? `<div class="grid">${categoryCards}</div>` : "") + directCards;
+  if (!content.innerHTML) content.innerHTML = `<div class="status">${esc(t("catalogEmpty"))}</div>`;
+  waMsg = `Hello Gem Travel, I want to inquire about excursions in ${currentDest.sourceLabel}.`;
+}
+
+function openCategory(index) {
+  if (!currentDest || !currentDest.categories || !currentDest.categories[index]) return;
+  currentCategory = currentDest.categories[index];
+  renderDestinationContent();
+}
+
+function renderPlaceCards(places, destIndex, categorized) {
+  if (!places || !places.length) return "";
+  return places.map((place, idx) => {
+    const firstImage = place.images[0];
+    const click = categorized
+      ? `showDetail(${destIndex}, ${idx}, ${currentDest.categories.indexOf(currentCategory)})`
+      : `showDetail(${destIndex}, ${idx}, -1)`;
+    return `<div class="place-card" role="button" tabindex="0" onclick="${click}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${click};}">
+      ${firstImage ? `<img src="${esc(firstImage.url)}" alt="${esc(placeLabel(place))}" loading="lazy" onerror="this.classList.add('image-unavailable')">` : ""}
+      <div title="${esc(place.sourceLabel)}">${esc(placeLabel(place))}</div></div>`;
+  }).join("");
+}
+
+function backFromDetail() {
+  stopSlides();
+  if (currentDest) {
+    openScreen("gov-screen");
+    renderDestinationContent();
+  } else {
+    openSightseeing();
+  }
+}
+
+function showDetail(destIdx, placeIdx, categoryIdx) {
   currentDest = tourData[destIdx];
-  currentPlace = currentDest.places[placeIdx];
+  currentCategory = categoryIdx >= 0 ? (currentDest && currentDest.categories[categoryIdx]) : null;
+  currentPlace = currentCategory
+    ? currentCategory.places[placeIdx]
+    : (currentDest && currentDest.places[placeIdx]);
+  if (!currentDest || !currentPlace) return;
   openScreen("detail-screen");
-  $("place-title").textContent = getName(currentPlace.name);
-  
-  const imgs = currentPlace.images, multi = imgs.length > 1;
+  $("place-title").textContent = placeLabel(currentPlace);
+  const imgs = currentPlace.images || [];
+  const multi = imgs.length > 1;
   $("slider-container").innerHTML = imgs.length
-    ? imgs.map((im, n) => `<div class="mySlides${n === 0 ? " active" : ""}"><img src="${im}" alt=""></div>`).join("") +
-      (multi ? `<button class="slide-nav prev" onclick="moveSlide(-1)">❮</button><button class="slide-nav next" onclick="moveSlide(1)">❯</button><div class="slide-count" id="slide-count">1/${imgs.length}</div>` : "")
-    : `<div class="status">لا توجد صور</div>`;
-    
-  waMsg = `Hello Gem Travel, I want to inquire/book: ${currentPlace.name.en} (${currentDest.name.en})`;
+    ? imgs.map((im, n) => `<div class="mySlides${n === 0 ? " active" : ""}"><img src="${esc(im.url)}" alt="${esc(im.name)}" loading="lazy" onerror="handleSlideImageError(this)"></div>`).join("") +
+      (multi ? `<button class="slide-nav prev" type="button" aria-label="Previous image" onclick="moveSlide(-1)">❮</button><button class="slide-nav next" type="button" aria-label="Next image" onclick="moveSlide(1)">❯</button><div class="slide-count" id="slide-count">1/${imgs.length}</div>` : "")
+    : `<div class="status">${esc(t("noImages"))}</div>`;
+  waMsg = `Hello Gem Travel, I want to inquire/book: ${placeLabel(currentPlace)} (${getName(currentDest.name)}).`;
   slideIdx = 0;
   if (multi) slideTimer = setInterval(() => moveSlide(1, true), 4000);
 }
 
+function handleSlideImageError(img) {
+  const slide = img.closest(".mySlides");
+  if (!slide) return;
+  const wasActive = slide.classList.contains("active");
+  slide.remove();
+  const slides = Array.from(document.querySelectorAll(".mySlides"));
+  const container = $("slider-container");
+  if (!slides.length) {
+    stopSlides();
+    container.innerHTML = `<div class="status">${esc(t("noImages"))}</div>`;
+    return;
+  }
+  slideIdx = Math.min(slideIdx, slides.length - 1);
+  if (wasActive) {
+    slides.forEach(s => s.classList.remove("active"));
+    slides[slideIdx].classList.add("active");
+  }
+  updateSlideCount();
+  if (slides.length < 2) stopSlides();
+}
+
+function updateSlideCount() {
+  const slides = document.querySelectorAll(".mySlides");
+  const count = $("slide-count");
+  if (count) count.textContent = `${slideIdx + 1}/${slides.length}`;
+  const multi = slides.length > 1;
+  document.querySelectorAll(".slide-nav").forEach(button => button.style.display = multi ? "" : "none");
+}
+
 function moveSlide(d, auto) {
-  const s = document.querySelectorAll(".mySlides");
-  if (!s.length) return;
-  s[slideIdx].classList.remove("active");
-  slideIdx = (slideIdx + d + s.length) % s.length;
-  s[slideIdx].classList.add("active");
-  const c = $("slide-count");
-  if (c) c.textContent = `${slideIdx + 1}/${s.length}`;
-  if (!auto && slideTimer) { clearInterval(slideTimer); slideTimer = setInterval(() => moveSlide(1, true), 4000); }
+  const slides = document.querySelectorAll(".mySlides");
+  if (!slides.length) return;
+  slides[slideIdx]?.classList.remove("active");
+  slideIdx = (slideIdx + d + slides.length) % slides.length;
+  slides[slideIdx].classList.add("active");
+  updateSlideCount();
+  if (!auto && slideTimer) {
+    clearInterval(slideTimer);
+    slideTimer = setInterval(() => moveSlide(1, true), 4000);
+  }
 }
 
 function stopSlides() { if (slideTimer) { clearInterval(slideTimer); slideTimer = null; } }
@@ -406,16 +652,22 @@ function changeLanguage(l) {
   Object.entries(map).forEach(([id, key]) => { if($(id)) $(id).textContent = t(key); });
   document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
   
-  if (!$("sightseeing-screen").classList.contains("hidden")) openSightseeing();
-  else if (!$("gov-screen").classList.contains("hidden") && currentDest) {
-    $("gov-title").textContent = getName(currentDest.name);
-  } else if (!$("detail-screen").classList.contains("hidden") && currentPlace) {
-    $("place-title").textContent = getName(currentPlace.name);
+  if (!$("sightseeing-screen").classList.contains("hidden")) {
+    if (catalogLoaded) renderDestinations();
+    else if (catalogLoading) setCatalogStatus(t("catalogLoading"), false);
+    else if (catalogError) showCatalogError();
+  } else if (!$("gov-screen").classList.contains("hidden") && currentDest) {
+    renderDestinationContent();
+  } else if (!$("detail-screen").classList.contains("hidden") && currentDest && currentPlace) {
+    showDetail(tourData.indexOf(currentDest),
+      currentCategory ? currentCategory.places.indexOf(currentPlace) : currentDest.places.indexOf(currentPlace),
+      currentCategory ? currentDest.categories.indexOf(currentCategory) : -1);
   }
 }
 
 changeLanguage("en");
 goMainHub();
+loadDriveCatalog();
 </script>
 </body>
 </html>
