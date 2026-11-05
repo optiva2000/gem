@@ -124,7 +124,6 @@ header{background:var(--primary-color);color:#fff;width:100%;padding:15px 20px;d
 
 <script>
 /* ================= الإعدادات وأرقام الفريق ================= */
-// Paste the deployed Google Apps Script Web App URL ending in /exec here.
 const DRIVE_API_URL = "https://script.google.com/macros/s/AKfycbyV1SXzJm7QtbnFQbew4mAXPm8e_o0bLjehCb1rDPLzBW00v989ujDtFxVGFBIoMzvCjg/exec";
 const DRIVE_API_TIMEOUT_MS = 20000;
 const teamContacts = [
@@ -189,7 +188,14 @@ const translations = {
   }
 };
 
-/* Sightseeing catalog is built only from the Google Drive JSON database. */
+/* أسماء الوجهات بكل اللغات */
+const destinationLabels = {
+  cairo: { ar: "القاهرة", en: "Cairo", fr: "Le Caire", es: "El Cairo", zh: "开罗", ja: "カイロ" },
+  alexandria: { ar: "الإسكندرية", en: "Alexandria", fr: "Alexandrie", es: "Alejandría", zh: "亚历山大", ja: "アレクサンドリア" },
+  luxor: { ar: "الأقصر", en: "Luxor", fr: "Louxor", es: "Luxor", zh: "卢克索", ja: "ルクソール" },
+  aswan: { ar: "أسوان", en: "Aswan", fr: "Assouan", es: "Asuán", zh: "阿斯旺", ja: "アスワン" }
+};
+
 let tourData = [];
 let catalogLoaded = false;
 let catalogLoading = false;
@@ -236,8 +242,6 @@ function loadDriveCatalog() {
     delete window[callbackName];
     const script = $("gem-drive-api-script");
     if (script) script.remove();
-    // Accept both the currently deployed Apps Script shape (success/data)
-    // and the newer shape (ok/records), without requiring another deployment.
     const records = payload && (Array.isArray(payload.data) ? payload.data : payload.records);
     const apiSucceeded = payload && (payload.success === true || payload.ok === true);
     if (!apiSucceeded || !Array.isArray(records)) {
@@ -294,6 +298,9 @@ function normalizeFolderName(value) {
     .replace(/\s+/g, " ");
 }
 
+/* الوجهات المستبعدة (مقفولة حالياً) */
+const EXCLUDED_DESTINATIONS = ["sharm el sheikh", "hurghada"];
+
 function canonicalDestinationName(value) {
   const key = normalizeFolderName(value)
     .replace(/\s+governorate$/i, "")
@@ -304,13 +311,18 @@ function canonicalDestinationName(value) {
     "alex": "alexandria", "alexandria": "alexandria", "alexanderia": "alexandria",
     "el alexandria": "alexandria", "al iskandariyah": "alexandria",
     "al iskandariya": "alexandria", "iskandariya": "alexandria", "iskandaria": "alexandria",
-    "cairo": "cairo", "al qahirah": "cairo", "el qahira": "cairo",
+    "الإسكندرية": "alexandria", "الاسكندرية": "alexandria", "اسكندرية": "alexandria",
+    "إسكندرية": "alexandria", "محافظة الإسكندرية": "alexandria", "محافظة الاسكندرية": "alexandria",
+    "cairo": "cairo", "al qahirah": "cairo", "el qahira": "cairo", "al qahira": "cairo",
+    "القاهرة": "cairo", "قاهرة": "cairo", "محافظة القاهرة": "cairo",
     "luxor": "luxor", "al uqsor": "luxor", "al uqsur": "luxor",
     "el uqsor": "luxor", "el uqsur": "luxor", "al uqsūr": "luxor",
     "الأقصر": "luxor", "الاقصر": "luxor", "محافظة الأقصر": "luxor", "محافظة الاقصر": "luxor",
-    "aswan": "aswan", "aswan governorate": "aswan", "أسوان": "aswan", "اسوان": "aswan",
+    "aswan": "aswan", "assuan": "aswan", "أسوان": "aswan", "اسوان": "aswan",
+    "محافظة أسوان": "aswan", "محافظة اسوان": "aswan",
     "sharm": "sharm el sheikh", "sharm el sheikh": "sharm el sheikh", "sharm elsheikh": "sharm el sheikh",
-    "hurghada": "hurghada", "el hurghada": "hurghada"
+    "شرم الشيخ": "sharm el sheikh",
+    "hurghada": "hurghada", "el hurghada": "hurghada", "الغردقة": "hurghada"
   };
 
   return aliases[key] || key;
@@ -319,6 +331,16 @@ function canonicalDestinationName(value) {
 function isKnownDestinationSegment(value) {
   const key = canonicalDestinationName(value);
   return ["cairo", "alexandria", "luxor", "aswan", "sharm el sheikh", "hurghada"].includes(key);
+}
+
+/* روابط بديلة للصورة: لو الأول فشل بيجرب اللي بعده */
+function driveImageUrls(id) {
+  const e = encodeURIComponent(id);
+  return [
+    `https://lh3.googleusercontent.com/d/${e}=w1200`,
+    `https://drive.google.com/thumbnail?id=${e}&sz=w1200`,
+    `https://drive.google.com/uc?export=view&id=${e}`
+  ];
 }
 
 function buildCatalog(records) {
@@ -334,32 +356,29 @@ function buildCatalog(records) {
     const rootIndex = parts.findIndex(x => normalizeFolderName(x) === "gem excursions");
     if (rootIndex < 0 || !parts[rootIndex + 1]) return;
 
-    // Usually the governorate is the first folder after Gem_Excursions.
-    // Also tolerate an optional Egypt/Egypt Governorates parent folder.
     let destinationIndex = rootIndex + 1;
     if (parts[destinationIndex] && ["egypt", "egypt governorates", "governorates"].includes(normalizeFolderName(parts[destinationIndex]))) {
       destinationIndex++;
     }
-    // If the folder has an extra wrapper, prefer a recognized governorate
-    // in the next two levels (e.g. Gem_Excursions/Egypt/Luxor/...).
     if (!isKnownDestinationSegment(parts[destinationIndex]) && isKnownDestinationSegment(parts[destinationIndex + 1])) {
       destinationIndex++;
     }
 
     const destinationSource = parts[destinationIndex];
+    if (!destinationSource) return;
     const destinationKey = canonicalDestinationName(destinationSource);
-    if (!destinationKey || ["sharm el sheikh", "hurghada"].includes(destinationKey)) return;
+    if (!destinationKey || EXCLUDED_DESTINATIONS.includes(destinationKey)) return;
 
-    const relativeParts = parts.slice(destinationIndex + 1);
-    if (!relativeParts.length) return;
+    // لو الصور مباشرة جوه فولدر المحافظة من غير فولدر مكان، نعتبرها مكان باسم المحافظة
+    let relativeParts = parts.slice(destinationIndex + 1);
+    if (!relativeParts.length) relativeParts = [destinationSource];
 
-    // The API is expected to return image records. Accept either id/url or
-    // construct the standard Drive view URL from the file id.
     const imageId = typeof record.id === "string" ? record.id : "";
-    const imageUrl = typeof record.url === "string" && record.url
-      ? record.url
-      : (imageId ? `https://drive.google.com/uc?export=view&id=${encodeURIComponent(imageId)}` : "");
-    if (!imageUrl || (!imageId && seenIds.has(imageUrl))) return;
+    const urls = imageId
+      ? driveImageUrls(imageId)
+      : (typeof record.url === "string" && record.url ? [record.url] : []);
+    if (!urls.length) return;
+    const imageUrl = urls[0];
     const uniqueKey = imageId || imageUrl;
     if (seenIds.has(uniqueKey)) return;
     seenIds.add(uniqueKey);
@@ -376,12 +395,10 @@ function buildCatalog(records) {
     }
 
     const dest = destinations.get(destinationKey);
-    const placeLabel = relativeParts[relativeParts.length - 1];
+    const placeLabelText = relativeParts[relativeParts.length - 1];
     const placePath = relativeParts.join("/");
-    const image = { name: record.name || "", id: imageId, url: imageUrl };
+    const image = { name: record.name || "", id: imageId, url: imageUrl, urls };
 
-    // A place directly under a governorate has one path segment.
-    // Any additional levels are treated as category/subcategory/place.
     if (relativeParts.length >= 2) {
       const categoryPath = relativeParts.slice(0, -1).join("/");
       if (!dest.categories.has(categoryPath)) {
@@ -395,8 +412,8 @@ function buildCatalog(records) {
       const category = dest.categories.get(categoryPath);
       if (!category._places.has(placePath)) {
         category._places.set(placePath, {
-          name: placeLabel,
-          sourceLabel: placeLabel,
+          name: placeLabelText,
+          sourceLabel: placeLabelText,
           path: placePath,
           images: []
         });
@@ -405,8 +422,8 @@ function buildCatalog(records) {
     } else {
       if (!dest._directPlaces.has(placePath)) {
         dest._directPlaces.set(placePath, {
-          name: placeLabel,
-          sourceLabel: placeLabel,
+          name: placeLabelText,
+          sourceLabel: placeLabelText,
           path: placePath,
           images: []
         });
@@ -426,14 +443,6 @@ function buildCatalog(records) {
     return dest;
   }).sort((a, b) => getName(a.name).localeCompare(getName(b.name)));
 }
-
-const destinationLabels = {
-  cairo: { ar: "القاهرة", en: "Cairo", fr: "Le Caire", es: "El Cairo", zh: "开罗", ja: "カイロ" },
-  alex: { ar: "الإسكندرية", en: "Alexandria", fr: "Alexandrie", es: "Alejandría", zh: "亚历山大", ja: "アレクサンドリア" },
-  alexandria: { ar: "الإسكندرية", en: "Alexandria", fr: "Alexandrie", es: "Alejandría", zh: "亚历山大", ja: "アレクサンドリア" },
-  luxor: { ar: "الأقصر", en: "Luxor", fr: "Louxor", es: "Luxor", zh: "卢克索", ja: "ルクソール" },
-  aswan: { ar: "أسوان", en: "Aswan", fr: "Assouan", es: "Asuán", zh: "阿斯旺", ja: "アスワン" }
-};
 
 function placeLabel(place) {
   return getName(place.labels || place.translations || place.name) || place.sourceLabel || "";
@@ -531,6 +540,20 @@ function openCategory(index) {
   renderDestinationContent();
 }
 
+/* لو الصورة فشلت: جرّب الرابط البديل، ولو خلصت البدائل اخفيها */
+function imgError(img, inSlider) {
+  let srcs = [];
+  try { srcs = JSON.parse(img.dataset.srcs || "[]"); } catch (e) {}
+  const next = Number(img.dataset.i || 0) + 1;
+  if (next < srcs.length) {
+    img.dataset.i = next;
+    img.src = srcs[next];
+    return;
+  }
+  if (inSlider) handleSlideImageError(img);
+  else img.classList.add("image-unavailable");
+}
+
 function renderPlaceCards(places, destIndex, categorized) {
   if (!places || !places.length) return "";
   return places.map((place, idx) => {
@@ -539,7 +562,7 @@ function renderPlaceCards(places, destIndex, categorized) {
       ? `showDetail(${destIndex}, ${idx}, ${currentDest.categories.indexOf(currentCategory)})`
       : `showDetail(${destIndex}, ${idx}, -1)`;
     return `<div class="place-card" role="button" tabindex="0" onclick="${click}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${click};}">
-      ${firstImage ? `<img src="${esc(firstImage.url)}" alt="${esc(placeLabel(place))}" loading="lazy" onerror="this.classList.add('image-unavailable')">` : ""}
+      ${firstImage ? `<img src="${esc(firstImage.url)}" data-i="0" data-srcs="${esc(JSON.stringify(firstImage.urls))}" alt="${esc(placeLabel(place))}" loading="lazy" referrerpolicy="no-referrer" onerror="imgError(this,false)">` : ""}
       <div title="${esc(place.sourceLabel)}">${esc(placeLabel(place))}</div></div>`;
   }).join("");
 }
@@ -566,7 +589,7 @@ function showDetail(destIdx, placeIdx, categoryIdx) {
   const imgs = currentPlace.images || [];
   const multi = imgs.length > 1;
   $("slider-container").innerHTML = imgs.length
-    ? imgs.map((im, n) => `<div class="mySlides${n === 0 ? " active" : ""}"><img src="${esc(im.url)}" alt="${esc(im.name)}" loading="lazy" onerror="handleSlideImageError(this)"></div>`).join("") +
+    ? imgs.map((im, n) => `<div class="mySlides${n === 0 ? " active" : ""}"><img src="${esc(im.url)}" data-i="0" data-srcs="${esc(JSON.stringify(im.urls))}" alt="${esc(im.name)}" referrerpolicy="no-referrer" onerror="imgError(this,true)"></div>`).join("") +
       (multi ? `<button class="slide-nav prev" type="button" aria-label="Previous image" onclick="moveSlide(-1)">❮</button><button class="slide-nav next" type="button" aria-label="Next image" onclick="moveSlide(1)">❯</button><div class="slide-count" id="slide-count">1/${imgs.length}</div>` : "")
     : `<div class="status">${esc(t("noImages"))}</div>`;
   waMsg = `Hello Gem Travel, I want to inquire/book: ${placeLabel(currentPlace)} (${getName(currentDest.name)}).`;
@@ -643,15 +666,15 @@ function changeLanguage(l) {
   root.lang = l;
   root.dir = l === "ar" ? "rtl" : "ltr";
   $("languageSelect").value = l;
-  
+
   const map = {
     "header-subtitle": "subtitle", "txt-main-title": "mainTitle", "btn-sightseeing": "sightseeing", "btn-car-rental": "carRental",
     "btn-airport-transfer": "airportTransfer", "fab-text": "fab", "modal-title": "modalTitle", "modal-close-btn": "closeBtn",
     "txt-choose-gov": "chooseGov", "car-title": "carTitle", "car-desc": "carDesc", "airport-title": "airportTitle", "airport-desc": "airportDesc"
   };
-  Object.entries(map).forEach(([id, key]) => { if($(id)) $(id).textContent = t(key); });
+  Object.entries(map).forEach(([id, key]) => { if ($(id)) $(id).textContent = t(key); });
   document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
-  
+
   if (!$("sightseeing-screen").classList.contains("hidden")) {
     if (catalogLoaded) renderDestinations();
     else if (catalogLoading) setCatalogStatus(t("catalogLoading"), false);
