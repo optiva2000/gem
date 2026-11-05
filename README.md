@@ -313,6 +313,8 @@
                 <div class="btn-card" onclick="openGov('Alex')">Alexandria (الإسكندرية)</div>
                 <div class="btn-card" onclick="openGov('Aswan')">Aswan (أسوان)</div>
                 <div class="btn-card" onclick="openGov('Luxor')">Luxor (الأقصر)</div>
+                <div class="btn-card" onclick="openGov('Sharm')">Sharm El Sheikh (شرم الشيخ)</div>
+                <div class="btn-card" onclick="openGov('Hurghada')">Hurghada (الغردقة)</div>
             </div>
         </div>
 
@@ -368,7 +370,7 @@
     <!-- نافذة اختيار الأسماء -->
     <div id="waModal" class="modal">
         <div class="modal-content">
-            <h3 id="modal-title">اختر من تحب مراسلته عبر الواتساب</h3>
+            <h3 id="modal-title">اختر الشخص المناسب لمراسلته عبر الواتساب</h3>
             <div id="wa-options-container"></div>
             <button class="close-modal" onclick="closeWhatsAppModal()" id="modal-close-btn">إغلاق</button>
         </div>
@@ -377,9 +379,8 @@
     <script>
         // الأرقام مرتبطة بالأسماء المباشرة (استبدل الأرقام والأسماء بما يناسبكم)
         const teamContacts = [
-            { name: "باسل سعيد", number: "201062519011" },
-            { name: "أحمد محمد", number: "201000000002" }, 
-            { name: "محمود علي", number: "201000000003" }  
+            { name: "باسل سعيد", number: "00201062519011" },
+            { name: "أمجد حلمي", number: "201284234111" }, 
         ];
 
         let currentModalText = "";
@@ -434,7 +435,9 @@
                 cairo: "القاهرة",
                 alex: "الإسكندرية",
                 aswan: "أسوان",
-                luxor: "الأقصر"
+                luxor: "الأقصر",
+                sharm: "شرم الشيخ",
+                hurghada: "الغردقة"
             },
             en: {
                 subtitle: "Travel Agencies - Explore Egypt",
@@ -454,294 +457,4 @@
                 chooseGov: "Select Destination",
                 placeDetails: "Place Details",
                 carTitle: "🚗 Car Rental with Professional Driver",
-                carDesc: "Enjoy freedom and exploration at your own pace! We offer modern, fully air-conditioned cars with professional drivers.",
-                airportTitle: "✈️ Seamless Airport Transfers",
-                airportDesc: "Start your trip without any fatigue! We will be waiting for you the moment your plane lands.",
-                cairo: "Cairo",
-                alex: "Alexandria",
-                aswan: "Aswan",
-                luxor: "Luxor"
-            },
-            fr: {
-                subtitle: "Agences de Voyage - Explorer l'Égypte",
-                mainTitle: "Bienvenue chez Gem Travel - Choisissez un service",
-                sightseeing: "🏛️ Excursions et Tourisme",
-                carRental: "🚗 Location de voiture avec chauffeur",
-                airportTransfer: "✈️ Transferts Aéroport",
-                homeWa: "Pour plus d'informations et réservations",
-                carWa: "Réserver via WhatsApp",
-                airportWa: "Réserver le transfert via WhatsApp",
-                detailWa: "Contact & Réservation WhatsApp",
-                modalTitle: "Sélectionnez un membre de l'équipe",
-                closeBtn: "Fermer",
-                backMain: "← Menu Principal",
-                backDest: "← Retour aux destinations",
-                backPlaces: "← Retour aux lieux",
-                chooseGov: "Sélectionnez la destination",
-                placeDetails: "Détails du lieu",
-                carTitle: "🚗 Location de voiture avec chauffeur",
-                carDesc: "Profitez de la liberté et de l'exploration à votre rythme.",
-                airportTitle: "✈️ Transferts aéroport",
-                airportDesc: "Commencez votre voyage sans fatigue !",
-                cairo: "Le Caire",
-                alex: "Alexandrie",
-                aswan: "Assouan",
-                luxor: "Louxor"
-            },
-            es: {
-                subtitle: "Agencias de Viajes - Explorar Egipto",
-                mainTitle: "Bienvenido a Gem Travel - Seleccione servicio",
-                sightseeing: "🏛️ Excursiones y Turismo",
-                carRental: "🚗 Alquiler de autos con chofer",
-                airportTransfer: "✈️ Traslados al Aeropuerto",
-                homeWa: "Para más información y reservas",
-                carWa: "Reservar por WhatsApp",
-                airportWa: "Reservar traslado por WhatsApp",
-                detailWa: "Contacto y Reserva por WhatsApp",
-                modalTitle: "Seleccione a un miembro del equipo",
-                closeBtn: "Cerrar",
-                backMain: "← Menú Principal",
-                backDest: "← Volver a destinos",
-                backPlaces: "← Volver a lugares",
-                chooseGov: "Seleccionar destino",
-                placeDetails: "Detalles del lugar",
-                carTitle: "🚗 Alquiler de autos con chofer",
-                carDesc: "¡Disfruta de la libertad y exploración a tu ritmo!",
-                airportTitle: "✈️ Traslados al aeropuerto",
-                airportDesc: "¡Comienza tu viaje sin fatiga!",
-                cairo: "El Cairo",
-                alex: "Alejandría",
-                aswan: "Asuán",
-                luxor: "Luxor"
-            },
-            zh: {
-                subtitle: "旅行社 - 探索埃及",
-                mainTitle: "欢迎来到 Gem Travel - 请选择服务",
-                sightseeing: "🏛️ 观光与游览",
-                carRental: "🚗 带有司机的汽车租赁",
-                airportTransfer: "✈️ 机场接送服务",
-                homeWa: "获取更多信息与预订",
-                carWa: "通过 WhatsApp 预订",
-                airportWa: "预订接机服务",
-                detailWa: "WhatsApp 咨询与预订",
-                modalTitle: "选择团队成员联系",
-                closeBtn: "关闭",
-                backMain: "← 主菜单",
-                backDest: "← 返回目的地",
-                backPlaces: "← 返回地点",
-                chooseGov: "选择目的地",
-                placeDetails: "地点详情",
-                carTitle: "🚗 专业司机租车服务",
-                carDesc: "按照您自己的节奏享受自由与探索！",
-                airportTitle: "✈️ 无忧机场接送服务",
-                airportDesc: "开启轻松旅程！",
-                cairo: "开罗",
-                alex: "亚历山大",
-                aswan: "阿斯旺",
-                luxor: "卢克索"
-            },
-            ja: {
-                subtitle: "旅行代理店 - エジプトを探索",
-                mainTitle: "Gem Travelへようこそ - サービスを選択",
-                sightseeing: "🏛️ 観光＆エクスカーション",
-                carRental: "🚗 ドライバー付きレンタカー",
-                airportTransfer: "✈️ 空港送迎サービス",
-                homeWa: "詳細情報とご予約について",
-                carWa: "WhatsAppで予約",
-                airportWa: "空港送迎を予約",
-                detailWa: "WhatsAppで予約・問い合わせ",
-                modalTitle: "担当者を選択して連絡",
-                closeBtn: "閉じる",
-                backMain: "← メインメニュー",
-                backDest: "← 目的地に戻る",
-                backPlaces: "← 場所に戻る",
-                chooseGov: "目的地を選択",
-                placeDetails: "場所の詳細",
-                carTitle: "🚗 プロドライバー付きレンタカー",
-                carDesc: "快適な観光をお楽しみください。",
-                airportTitle: "✈️ スムーズな空港送迎",
-                airportDesc: "旅の始まりをストレスフリーに！",
-                cairo: "カイロ",
-                alex: "アレクサンドリア",
-                aswan: "アスワン",
-                luxor: "ルクソール"
-            }
-        };
-
-        let currentLang = 'en';
-
-        function changeLanguage(lang) {
-            currentLang = lang;
-            const t = translations[lang];
-            const htmlRoot = document.getElementById('html-root');
-            
-            if (lang === 'ar') {
-                htmlRoot.setAttribute('dir', 'rtl');
-                htmlRoot.setAttribute('lang', 'ar');
-            } else {
-                htmlRoot.setAttribute('dir', 'ltr');
-                htmlRoot.setAttribute('lang', lang);
-            }
-
-            document.getElementById('header-subtitle').innerText = t.subtitle;
-            document.getElementById('txt-main-title').innerText = t.mainTitle;
-            document.getElementById('btn-sightseeing').innerText = t.sightseeing;
-            document.getElementById('btn-car-rental').innerText = t.carRental;
-            document.getElementById('btn-airport-transfer').innerText = t.airportTransfer;
-            document.getElementById('txt-home-wa').innerText = t.homeWa;
-            document.getElementById('txt-car-wa').innerText = t.carWa;
-            document.getElementById('txt-airport-wa').innerText = t.airportWa;
-            document.getElementById('txt-detail-wa').innerText = t.detailWa;
-            document.getElementById('modal-title').innerText = t.modalTitle;
-            document.getElementById('modal-close-btn').innerText = t.closeBtn;
-            
-            document.getElementById('btn-back-main1').innerText = t.backMain;
-            document.getElementById('btn-back-main2').innerText = t.backMain;
-            document.getElementById('btn-back-main3').innerText = t.backMain;
-            document.getElementById('btn-back-sightseeing').innerText = t.backDest;
-            document.getElementById('txt-choose-gov').innerText = t.chooseGov;
-            
-            document.getElementById('car-title').innerText = t.carTitle;
-            document.getElementById('car-desc').innerText = t.carDesc;
-            document.getElementById('airport-title').innerText = t.airportTitle;
-            document.getElementById('airport-desc').innerText = t.airportDesc;
-
-            const buttons = document.querySelectorAll('#sightseeing-screen .btn-card');
-            const keys = ['Cairo', 'Alex', 'Aswan', 'Luxor'];
-            buttons.forEach((btn, index) => {
-                let keyName = keys[index].toLowerCase();
-                btn.innerText = t[keyName] || keys[index];
-            });
-        }
-
-        function openScreen(screenId) {
-            document.getElementById('main-hub-screen').classList.add('hidden');
-            document.getElementById('sightseeing-screen').classList.add('hidden');
-            document.getElementById('car-rental-screen').classList.add('hidden');
-            document.getElementById('airport-transfer-screen').classList.add('hidden');
-            document.getElementById('gov-screen').classList.add('hidden');
-            document.getElementById('detail-screen').classList.add('hidden');
-
-            document.getElementById(screenId).classList.remove('hidden');
-        }
-
-        function goMainHub() {
-            openScreen('main-hub-screen');
-        }
-
-        const tourData = {
-            Cairo: {
-                title: { ar: "رحلات القاهرة", en: "Cairo Tours", fr: "Excursions au Caire", es: "Tours por El Cairo", zh: "开罗旅游", ja: "カイロツアー" },
-                subsections: [
-                    {
-                        category: { ar: "رحلات نهارية", en: "Cairo Day Trips", fr: "Visites diurnes", es: "Tours diurnos", zh: "日间游", ja: "日帰りツアー" },
-                        items: [
-                            { name: "Pyramids of Giza", images: ["https://images.unsplash.com/photo-1539650116574-8efeb43e2750", "https://images.unsplash.com/photo-1568322445760-727c66798c8c"] },
-                            { name: "Cairo Citadel", images: ["https://images.unsplash.com/photo-1572252009286-268acec5ca0a"] },
-                            { name: "Grand Egyptian Museum", images: ["https://images.unsplash.com/photo-1564507592333-c60657eea523"] }
-                        ]
-                    }
-                ]
-            },
-            Alex: {
-                title: { ar: "الإسكندرية", en: "Alexandria", fr: "Alexandrie", es: "Alejandría", zh: "亚历山大", ja: "アレクサンドリア" },
-                subsections: [
-                    {
-                        category: { ar: "معالم الإسكندرية", en: "Alexandria Landmarks", fr: "Monuments", es: "Monumentos", zh: "地标", ja: "ランドマーク" },
-                        items: [
-                            { name: "Qaitbay Castle", images: ["https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7"] },
-                            { name: "Alexandria Library", images: ["https://images.unsplash.com/photo-1541872703-74c5e44368f9"] }
-                        ]
-                    }
-                ]
-            },
-            Aswan: {
-                title: { ar: "أسوان", en: "Aswan", fr: "Assouan", es: "Asuán", zh: "阿斯旺", ja: "アスワン" },
-                subsections: [
-                    {
-                        category: { ar: "معالم أسوان", en: "Aswan Highlights", fr: "Sites d'Assouan", es: "Sitios de Asuán", zh: "阿斯旺景点", ja: "アスワンの見どころ" },
-                        items: [
-                            { name: "Abu Simbel", images: ["https://images.unsplash.com/photo-1564507592333-c60657eea523"] },
-                            { name: "Nubian Village", images: ["https://images.unsplash.com/photo-1544816155-12df9643f363"] }
-                        ]
-                    }
-                ]
-            },
-            Luxor: {
-                title: { ar: "الأقصر", en: "Luxor", fr: "Louxor", es: "Luxor", zh: "卢克索", ja: "ルクソール" },
-                subsections: [
-                    {
-                        category: { ar: "معالم الأقصر", en: "Luxor Temples & Valley", fr: "Temples de Louxor", es: "Templos de Luxor", zh: "卢克索神庙与河谷", ja: "ルクソールの神殿と渓谷" },
-                        items: [
-                            { name: "Karnak Temple", images: ["https://images.unsplash.com/photo-1608953151270-2495edab4fb6"] },
-                            { name: "Valley of the Kings", images: ["https://images.unsplash.com/photo-1568322445760-727c66798c8c"] }
-                        ]
-                    }
-                ]
-            }
-        };
-
-        function openGov(govKey) {
-            document.getElementById('sightseeing-screen').classList.add('hidden');
-            document.getElementById('gov-screen').classList.remove('hidden');
-            
-            const data = tourData[govKey];
-            let govTitle = data.title[currentLang] || data.title['en'];
-            let html = `<div class="section-title">${govTitle}</div>`;
-            
-            data.subsections.forEach(sub => {
-                let catName = sub.category[currentLang] || sub.category['en'];
-                if(catName) html += `<h4 style="color:#0284c7; margin-top:20px;">${catName}</h4>`;
-                html += `<div class="grid">`;
-                sub.items.forEach(item => {
-                    html += `<div class="btn-card" onclick='openPlace(${JSON.stringify(item.name)}, ${JSON.stringify(item.images)})'>${item.name}</div>`;
-                });
-                html += `</div>`;
-            });
-            document.getElementById('gov-content').innerHTML = html;
-        }
-
-        let slideInterval;
-        function backToGov() {
-            clearInterval(slideInterval);
-            document.getElementById('detail-screen').classList.add('hidden');
-            document.getElementById('gov-screen').classList.remove('hidden');
-        }
-
-        function openPlace(placeName, images) {
-            document.getElementById('gov-screen').classList.add('hidden');
-            document.getElementById('detail-screen').classList.remove('hidden');
-            document.getElementById('place-title').innerText = placeName;
-
-            let sliderHtml = '';
-            images.forEach((img, index) => {
-                sliderHtml += `
-                    <div class="mySlides" style="display: ${index === 0 ? 'block' : 'none'}">
-                        <img src="${img}" alt="${placeName}">
-                        <div class="slide-caption">${placeName} - Photo ${index + 1}</div>
-                    </div>
-                `;
-            });
-            document.getElementById('slider-container').innerHTML = sliderHtml;
-
-            let detailBtn = document.getElementById('detail-wa-btn');
-            detailBtn.onclick = function() {
-                openWhatsAppModal(`Hello Gem Travel, I would like to inquire and reserve for: ${placeName}`);
-            };
-
-            if (images.length > 1) {
-                let sIndex = 0;
-                clearInterval(slideInterval);
-                slideInterval = setInterval(() => {
-                    let slides = document.querySelectorAll('.mySlides');
-                    slides.forEach(s => s.style.display = 'none');
-                    sIndex = (sIndex + 1) % slides.length;
-                    slides[sIndex].style.display = 'block';
-                }, 3000);
-            }
-        }
-
-        changeLanguage('en');
-    </script>
-</body>
-</html>
+                carDesc: "Enjoy freedom and exploration at your own pace! We offer modern, fully air-conditioned cars with professional
