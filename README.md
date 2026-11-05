@@ -198,13 +198,67 @@
             cursor: pointer;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             text-decoration: none;
             box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
             transition: background 0.3s;
+            width: 100%;
+            box-sizing: border-box;
         }
         .whatsapp-btn:hover {
             background-color: #20ba5a;
+        }
+        /* نافذة اختيار الأسماء المنبثقة */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .wa-number-option {
+            background-color: #f1f5f9;
+            border: 2px solid #25d366;
+            color: #1e293b;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            display: block;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .wa-number-option:hover {
+            background-color: #25d366;
+            color: white;
+        }
+        .close-modal {
+            background-color: #64748b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            cursor: pointer;
         }
         .hidden {
             display: none;
@@ -242,9 +296,11 @@
                 <div class="main-btn" onclick="openScreen('airport-transfer-screen')" id="btn-airport-transfer">✈️ Airport Transfer</div>
             </div>
 
-            <!-- زرار الواتساب الإضافي في الواجهة الرئيسية -->
+            <!-- زرار الواتساب في الواجهة الرئيسية -->
             <div class="whatsapp-box" style="margin-top: 30px;">
-                <a id="wa-home-link" href="#" target="_blank" class="whatsapp-btn" style="width: 100%; justify-content: center; box-sizing: border-box;">💬 <span id="txt-home-wa">For More Information & Booking</span></a>
+                <button onclick="openWhatsAppModal('Hello Gem Travel, I would like more information and general booking.')" class="whatsapp-btn">
+                    💬 <span id="txt-home-wa">For More Information & Booking</span>
+                </button>
             </div>
         </div>
 
@@ -268,7 +324,9 @@
                 <p id="car-desc">Enjoy freedom and exploration at your own pace! We offer modern, fully air-conditioned cars with professional drivers for a stress-free journey.</p>
             </div>
             <div class="whatsapp-box">
-                <a id="wa-car-link" href="#" target="_blank" class="whatsapp-btn">💬 Book Car & Driver via WhatsApp</a>
+                <button onclick="openWhatsAppModal('Hello Gem Travel, I want to inquire about Car Rental with Driver.')" class="whatsapp-btn">
+                    💬 <span id="txt-car-wa">Book Car & Driver via WhatsApp</span>
+                </button>
             </div>
         </div>
 
@@ -280,7 +338,9 @@
                 <p id="airport-desc">Start your trip without any fatigue! We will be waiting for you the moment your plane lands to ensure a smooth arrival.</p>
             </div>
             <div class="whatsapp-box">
-                <a id="wa-airport-link" href="#" target="_blank" class="whatsapp-btn">💬 Book Airport Transfer via WhatsApp</a>
+                <button onclick="openWhatsAppModal('Hello Gem Travel, I want to book an Airport Transfer.')" class="whatsapp-btn">
+                    💬 <span id="txt-airport-wa">Book Airport Transfer via WhatsApp</span>
+                </button>
             </div>
         </div>
 
@@ -298,13 +358,56 @@
             <div class="slideshow-container" id="slider-container"></div>
 
             <div class="whatsapp-box">
-                <a id="wa-link" href="#" target="_blank" class="whatsapp-btn">💬 Contact for Details & Reservation</a>
+                <button id="detail-wa-btn" onclick="" class="whatsapp-btn">
+                    💬 <span id="txt-detail-wa">Contact for Details & Reservation</span>
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- نافذة اختيار الأسماء -->
+    <div id="waModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title">اختر من تحب مراسلته عبر الواتساب</h3>
+            <div id="wa-options-container"></div>
+            <button class="close-modal" onclick="closeWhatsAppModal()" id="modal-close-btn">إغلاق</button>
+        </div>
+    </div>
+
     <script>
-        const primaryWhatsApp = "201062519011";
+        // الأرقام مرتبطة بالأسماء المباشرة (استبدل الأرقام والأسماء بما يناسبكم)
+        const teamContacts = [
+            { name: "باسل سعيد", number: "201062519011" },
+            { name: "أحمد محمد", number: "201000000002" }, 
+            { name: "محمود علي", number: "201000000003" }  
+        ];
+
+        let currentModalText = "";
+
+        function openWhatsAppModal(text) {
+            currentModalText = text;
+            const container = document.getElementById('wa-options-container');
+            container.innerHTML = "";
+
+            teamContacts.forEach(item => {
+                let encodedText = encodeURIComponent(currentModalText);
+                let link = `https://wa.me/${item.number}?text=${encodedText}`;
+                
+                let btn = document.createElement('a');
+                btn.href = link;
+                btn.target = "_blank";
+                btn.className = "wa-number-option";
+                btn.innerHTML = `🟢 ${item.name} (${item.number})`;
+                btn.onclick = () => closeWhatsAppModal();
+                container.appendChild(btn);
+            });
+
+            document.getElementById('waModal').style.display = 'flex';
+        }
+
+        function closeWhatsAppModal() {
+            document.getElementById('waModal').style.display = 'none';
+        }
 
         const translations = {
             ar: {
@@ -314,18 +417,20 @@
                 carRental: "🚗 تأجير سيارات مع سائق",
                 airportTransfer: "✈️ انتقالات المطار",
                 homeWa: "لمزيد من المعلومات والحجز العام",
+                carWa: "احجز سيارة مع سائق عبر الواتساب",
+                airportWa: "احجز انتقالات المطار عبر الواتساب",
+                detailWa: "احجز واستعلم عبر الواتساب",
+                modalTitle: "اختر الشخص المناسب لمراسلته عبر الواتساب",
+                closeBtn: "إغلاق",
                 backMain: "← القائمة الرئيسية",
                 backDest: "← العودة للوجهات",
                 backPlaces: "← رجوع للأماكن",
                 chooseGov: "اختر الوجهة السياحية",
                 placeDetails: "تفاصيل المكان",
-                waBtn: "💬 احجز واستعلم عبر الواتساب",
                 carTitle: "🚗 تأجير سيارات مع سائق محترف",
                 carDesc: "استمتع براحة الحرية والاستكشاف على طريقتك الخاصة! نوفر لك سيارات حديثة ومكيفة بالكامل مع نخبة من السائقين المحترفين.",
-                carWa: "💬 احجز سيارة مع سائق عبر الواتساب",
                 airportTitle: "✈️ انتقالات المطار بكل سهولة وأمان",
                 airportDesc: "ابدأ رحلتك بلا إرهاق! نحن في انتظارك لحظة هبوط طائرتك لضمان وصولك بكل أمان وراحة.",
-                airportWa: "💬 احجز انتقالات المطار عبر الواتساب",
                 cairo: "القاهرة",
                 alex: "الإسكندرية",
                 aswan: "أسوان",
@@ -338,18 +443,20 @@
                 carRental: "🚗 Car Rental with Driver",
                 airportTransfer: "✈️ Airport Transfers",
                 homeWa: "For More Information & Booking",
+                carWa: "Book Car & Driver via WhatsApp",
+                airportWa: "Book Airport Transfer via WhatsApp",
+                detailWa: "Contact for Details & Reservation",
+                modalTitle: "Select Team Member to Contact via WhatsApp",
+                closeBtn: "Close",
                 backMain: "← Main Menu",
                 backDest: "← Back to Destinations",
                 backPlaces: "← Back to Places",
                 chooseGov: "Select Destination",
                 placeDetails: "Place Details",
-                waBtn: "💬 Contact for Details & Reservation",
                 carTitle: "🚗 Car Rental with Professional Driver",
                 carDesc: "Enjoy freedom and exploration at your own pace! We offer modern, fully air-conditioned cars with professional drivers.",
-                carWa: "💬 Book Car & Driver via WhatsApp",
                 airportTitle: "✈️ Seamless Airport Transfers",
                 airportDesc: "Start your trip without any fatigue! We will be waiting for you the moment your plane lands.",
-                airportWa: "💬 Book Airport Transfer via WhatsApp",
                 cairo: "Cairo",
                 alex: "Alexandria",
                 aswan: "Aswan",
@@ -362,18 +469,20 @@
                 carRental: "🚗 Location de voiture avec chauffeur",
                 airportTransfer: "✈️ Transferts Aéroport",
                 homeWa: "Pour plus d'informations et réservations",
+                carWa: "Réserver via WhatsApp",
+                airportWa: "Réserver le transfert via WhatsApp",
+                detailWa: "Contact & Réservation WhatsApp",
+                modalTitle: "Sélectionnez un membre de l'équipe",
+                closeBtn: "Fermer",
                 backMain: "← Menu Principal",
                 backDest: "← Retour aux destinations",
                 backPlaces: "← Retour aux lieux",
                 chooseGov: "Sélectionnez la destination",
                 placeDetails: "Détails du lieu",
-                waBtn: "💬 Contact & Réservation WhatsApp",
                 carTitle: "🚗 Location de voiture avec chauffeur",
-                carDesc: "Profitez de la liberté et de l'exploration à votre rythme avec des voitures modernes.",
-                carWa: "💬 Réserver via WhatsApp",
+                carDesc: "Profitez de la liberté et de l'exploration à votre rythme.",
                 airportTitle: "✈️ Transferts aéroport",
-                airportDesc: "Commencez votre voyage sans fatigue ! Nous vous attendons dès l'atterrissage.",
-                airportWa: "💬 Réserver le transfert via WhatsApp",
+                airportDesc: "Commencez votre voyage sans fatigue !",
                 cairo: "Le Caire",
                 alex: "Alexandrie",
                 aswan: "Assouan",
@@ -386,18 +495,20 @@
                 carRental: "🚗 Alquiler de autos con chofer",
                 airportTransfer: "✈️ Traslados al Aeropuerto",
                 homeWa: "Para más información y reservas",
+                carWa: "Reservar por WhatsApp",
+                airportWa: "Reservar traslado por WhatsApp",
+                detailWa: "Contacto y Reserva por WhatsApp",
+                modalTitle: "Seleccione a un miembro del equipo",
+                closeBtn: "Cerrar",
                 backMain: "← Menú Principal",
                 backDest: "← Volver a destinos",
                 backPlaces: "← Volver a lugares",
                 chooseGov: "Seleccionar destino",
                 placeDetails: "Detalles del lugar",
-                waBtn: "💬 Contacto y Reserva por WhatsApp",
                 carTitle: "🚗 Alquiler de autos con chofer",
-                carDesc: "¡Disfruta de la libertad y exploración a tu ritmo con vehículos modernos!",
-                carWa: "💬 Reservar por WhatsApp",
+                carDesc: "¡Disfruta de la libertad y exploración a tu ritmo!",
                 airportTitle: "✈️ Traslados al aeropuerto",
-                airportDesc: "¡Comienza tu viaje sin fatiga! Te esperamos en cuanto aterrice tu avión.",
-                airportWa: "💬 Reservar traslado por WhatsApp",
+                airportDesc: "¡Comienza tu viaje sin fatiga!",
                 cairo: "El Cairo",
                 alex: "Alejandría",
                 aswan: "Asuán",
@@ -410,18 +521,20 @@
                 carRental: "🚗 带有司机的汽车租赁",
                 airportTransfer: "✈️ 机场接送服务",
                 homeWa: "获取更多信息与预订",
+                carWa: "通过 WhatsApp 预订",
+                airportWa: "预订接机服务",
+                detailWa: "WhatsApp 咨询与预订",
+                modalTitle: "选择团队成员联系",
+                closeBtn: "关闭",
                 backMain: "← 主菜单",
                 backDest: "← 返回目的地",
                 backPlaces: "← 返回地点",
                 chooseGov: "选择目的地",
                 placeDetails: "地点详情",
-                waBtn: "💬 WhatsApp 咨询与预订",
                 carTitle: "🚗 专业司机租车服务",
                 carDesc: "按照您自己的节奏享受自由与探索！",
-                carWa: "💬 通过 WhatsApp 预订",
                 airportTitle: "✈️ 无忧机场接送服务",
                 airportDesc: "开启轻松旅程！",
-                airportWa: "💬 预订接机服务",
                 cairo: "开罗",
                 alex: "亚历山大",
                 aswan: "阿斯旺",
@@ -434,18 +547,20 @@
                 carRental: "🚗 ドライバー付きレンタカー",
                 airportTransfer: "✈️ 空港送迎サービス",
                 homeWa: "詳細情報とご予約について",
+                carWa: "WhatsAppで予約",
+                airportWa: "空港送迎を予約",
+                detailWa: "WhatsAppで予約・問い合わせ",
+                modalTitle: "担当者を選択して連絡",
+                closeBtn: "閉じる",
                 backMain: "← メインメニュー",
                 backDest: "← 目的地に戻る",
                 backPlaces: "← 場所に戻る",
                 chooseGov: "目的地を選択",
                 placeDetails: "場所の詳細",
-                waBtn: "💬 WhatsAppで予約・問い合わせ",
                 carTitle: "🚗 プロドライバー付きレンタカー",
                 carDesc: "快適な観光をお楽しみください。",
-                carWa: "💬 WhatsAppで予約",
                 airportTitle: "✈️ スムーズな空港送迎",
                 airportDesc: "旅の始まりをストレスフリーに！",
-                airportWa: "💬 空港送迎を予約",
                 cairo: "カイロ",
                 alex: "アレクサンドリア",
                 aswan: "アスワン",
@@ -474,6 +589,11 @@
             document.getElementById('btn-car-rental').innerText = t.carRental;
             document.getElementById('btn-airport-transfer').innerText = t.airportTransfer;
             document.getElementById('txt-home-wa').innerText = t.homeWa;
+            document.getElementById('txt-car-wa').innerText = t.carWa;
+            document.getElementById('txt-airport-wa').innerText = t.airportWa;
+            document.getElementById('txt-detail-wa').innerText = t.detailWa;
+            document.getElementById('modal-title').innerText = t.modalTitle;
+            document.getElementById('modal-close-btn').innerText = t.closeBtn;
             
             document.getElementById('btn-back-main1').innerText = t.backMain;
             document.getElementById('btn-back-main2').innerText = t.backMain;
@@ -483,16 +603,8 @@
             
             document.getElementById('car-title').innerText = t.carTitle;
             document.getElementById('car-desc').innerText = t.carDesc;
-            document.getElementById('wa-car-link').innerText = t.carWa;
-            
             document.getElementById('airport-title').innerText = t.airportTitle;
             document.getElementById('airport-desc').innerText = t.airportDesc;
-            document.getElementById('wa-airport-link').innerText = t.airportWa;
-
-            document.getElementById('wa-home-link.href') // dummy
-            document.getElementById('wa-home-link').href = `https://wa.me/${primaryWhatsApp}?text=${encodeURIComponent('Hello Gem Travel, I would like more information and general booking.')}`;
-            document.getElementById('wa-car-link').href = `https://wa.me/${primaryWhatsApp}?text=${encodeURIComponent('Hello Gem Travel, I want to inquire about Car Rental with Driver.')}`;
-            document.getElementById('wa-airport-link').href = `https://wa.me/${primaryWhatsApp}?text=${encodeURIComponent('Hello Gem Travel, I want to book an Airport Transfer.')}`;
 
             const buttons = document.querySelectorAll('#sightseeing-screen .btn-card');
             const keys = ['Cairo', 'Alex', 'Aswan', 'Luxor'];
@@ -612,8 +724,10 @@
             });
             document.getElementById('slider-container').innerHTML = sliderHtml;
 
-            let waText = encodeURIComponent(`Hello Gem Travel, I would like to inquire and reserve for: ${placeName}`);
-            document.getElementById('wa-link').href = `https://wa.me/${primaryWhatsApp}?text=${waText}`;
+            let detailBtn = document.getElementById('detail-wa-btn');
+            detailBtn.onclick = function() {
+                openWhatsAppModal(`Hello Gem Travel, I would like to inquire and reserve for: ${placeName}`);
+            };
 
             if (images.length > 1) {
                 let sIndex = 0;
